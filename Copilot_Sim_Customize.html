@@ -1,0 +1,420 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>4 · Skills, Agents, Tools, Hooks, MCP: customizing GitHub Copilot</title>
+<meta name="description" content="Step-by-step simulator: the GitHub Copilot customization layers in VS Code and the Copilot CLI. Write a skill, a custom agent, tool approvals, a hook and an MCP config for a FastAPI repo, then try them in a hands-on lab.">
+<link rel="stylesheet" href="assets/copilot-sim.css?v=1">
+<link rel="stylesheet" href="assets/copilot-kit.css?v=1">
+</head>
+<body>
+<header class="sim-header">
+  <div class="icon">🧩</div>
+  <div>
+    <h1>4 · Skills, Agents, Tools, Hooks, MCP</h1>
+    <p>What each customization building block is, where its file lives, how VS Code and the CLI load it, and how Priya and Marco use them on ShipTrack.</p>
+    <div class="stack-pills"><span class="pill">Updated November 2026</span><span class="pill">VS Code · Copilot harness</span><span class="pill">GitHub Copilot CLI</span><span class="pill">ShipTrack · FastAPI</span><span class="pill">Hands-on lab</span></div>
+  </div>
+  <a class="home-link" href="index.html">⌂ All guides</a>
+</header>
+<div class="sim-body">
+  <nav class="sidebar" id="steps-nav" aria-label="Steps"></nav>
+  <main class="main-area">
+    <div class="progress-bar-container">
+      <div class="progress-bar-outer"><div class="progress-bar-inner" id="progress"></div></div>
+      <div class="progress-label" id="progress-label">Step 1</div>
+    </div>
+    <div class="step-content-area">
+
+<!-- 1 -->
+<section class="step-panel" data-section="Concepts" data-title="Mental model" data-sub="Six layers, one repo">
+  <div class="step-header"><div class="phase-tag purple">🗺️ Map</div><h2>Six building blocks, each answers one question</h2><p>Marco wants ShipTrack's standards applied the same way whether Priya works in VS Code or he works in the CLI. Each block below does one job. Most live in <code>.github/</code>, so the whole team shares them through git.</p></div>
+
+  <div class="tbl-wrap"><table class="tbl">
+    <tr><th>Block</th><th>Question it answers</th><th>Repo file</th><th>When it applies</th></tr>
+    <tr><td><strong>Custom instructions</strong></td><td>What should Copilot always know here?</td><td><code>.github/copilot-instructions.md</code>, <code>AGENTS.md</code></td><td>Every chat/agent request</td></tr>
+    <tr><td><strong>Skills</strong></td><td>How do we do task X, step by step?</td><td><code>.github/skills/&lt;name&gt;/SKILL.md</code></td><td>When you type <code>/name</code>, or the model decides it fits</td></tr>
+    <tr><td><strong>Custom agents</strong></td><td>Who is doing the work, with which tools?</td><td><code>.github/agents/&lt;name&gt;.agent.md</code></td><td>When you pick that agent</td></tr>
+    <tr><td><strong>Tools</strong></td><td>What can the agent actually do?</td><td>Built in, plus MCP</td><td>Every tool call, subject to approval</td></tr>
+    <tr><td><strong>Hooks</strong></td><td>What must always happen, no matter what the model thinks?</td><td><code>.github/hooks/*.json</code></td><td>Lifecycle events (before/after tools, session start…)</td></tr>
+    <tr><td><strong>MCP servers</strong></td><td>Which outside systems can it reach?</td><td><code>.mcp.json</code> (or <code>.vscode/mcp.json</code>)</td><td>Their tools join the tool list</td></tr>
+  </table></div>
+
+  <div class="flow"><span class="node done">Instructions (always)</span><span class="arrow">→</span><span class="node done">Agent (persona + tool limits)</span><span class="arrow">→</span><span class="node on">Skill (task recipe)</span><span class="arrow">→</span><span class="node">Tools + MCP</span><span class="arrow">⇄</span><span class="node">Hooks (guardrails)</span></div>
+
+  <div class="callout tip"><div class="icon">💡</div><p><strong>Rule of thumb:</strong> if the model may skip it, it is guidance (instructions, skills, agents). If it must never be skipped, it is a hook or a permission. <strong>Plugins</strong> bundle skills, agents, hooks and MCP servers into one installable package (<code>/plugin</code> in the CLI).</p></div>
+  <div class="callout warn"><div class="icon">⚠️</div><p>VS Code's <strong>Local</strong> harness is deprecated (removal planned by February 2027). Prompt files, agent <code>handoffs</code> and the <code>.vscode/mcp.json</code> <code>servers</code> format belong to it. This page uses the default <strong>Copilot</strong> harness, which shares formats with the CLI.</p></div>
+</section>
+
+<!-- 2 -->
+<section class="step-panel" data-section="Concepts" data-title="Instructions recap" data-sub="Always-on context">
+  <div class="step-header"><div class="phase-tag">📏 Recap</div><h2>Custom instructions: the base layer</h2><p>Everything else builds on these. The full story, including AGENTS.md and Copilot Memory, is in <a href="Copilot_Sim_Knowledge.html">8 · Knowledge &amp; learning loop</a>. Here is the short version for ShipTrack.</p></div>
+
+  <div class="filetree"><div class="ft-header">northwind/shiptrack</div>
+<pre><span class="ft-folder">.github/</span>
+├── <span class="ft-new">copilot-instructions.md</span>          <span class="ft-note">repo-wide, always loaded</span>
+└── <span class="ft-folder">instructions/</span>
+    └── <span class="ft-new">tests.instructions.md</span>        <span class="ft-note">only when files match applyTo</span>
+<span class="ft-new">AGENTS.md</span>                            <span class="ft-note">cross-tool instructions (nested files supported)</span></pre></div>
+
+  <div class="doc"><div class="doc-bar">.github/instructions/tests.instructions.md<span class="state">new</span></div><div class="doc-body"><span class="md-c">---</span>
+<span class="md-k">name</span>: <span class="md-s">ShipTrack tests</span>
+<span class="md-k">description</span>: <span class="md-s">How we write pytest tests for the API</span>
+<span class="md-k">applyTo</span>: <span class="md-s">"tests/**"</span>
+<span class="md-c">---</span>
+<span class="md-h"># Testing rules</span>
+- Use pytest with httpx.AsyncClient against the FastAPI app; no live network.
+- One test module per router: tests/test_&lt;router&gt;.py.
+- Cover the happy path plus 404 and 422 for every endpoint.
+- Use the db_session fixture from tests/conftest.py; never touch a real database.</div></div>
+
+  <ul class="body">
+    <li>Instructions shape chat and agents. They <strong>do not</strong> affect inline suggestions.</li>
+    <li>Personal instructions for every repo: <code>~/.copilot/copilot-instructions.md</code>.</li>
+    <li>Generate a starter file with <code>/init</code> in the CLI; list what is loaded with <code>copilot instruction list</code>.</li>
+  </ul>
+</section>
+
+<!-- 3 -->
+<section class="step-panel" data-section="Building blocks" data-title="Skills" data-sub="SKILL.md recipes">
+  <div class="step-header"><div class="phase-tag green">🛠️ Skills</div><h2>Skills: reusable task recipes</h2><p>A skill is a folder with a <code>SKILL.md</code> that teaches one task. Skills follow the open <a href="https://agentskills.io">agentskills.io</a> standard, so the same folder works in VS Code, the CLI and other compatible tools. Priya writes one for "add an endpoint" because ShipTrack will get many.</p></div>
+
+  <h3 class="subsection">Where skills live</h3>
+  <div class="tbl-wrap"><table class="tbl">
+    <tr><th>Scope</th><th>Folders</th></tr>
+    <tr><td><strong>Repo (shared)</strong></td><td><code>.github/skills/&lt;name&gt;/</code>, also <code>.claude/skills/</code> and <code>.agents/skills/</code></td></tr>
+    <tr><td><strong>Personal</strong></td><td><code>~/.copilot/skills/</code>, <code>~/.agents/skills/</code>, <code>~/.claude/skills/</code></td></tr>
+    <tr><td><strong>CLI extras</strong></td><td><code>COPILOT_SKILLS_DIRS</code> environment variable; folders added with <code>/add-dir</code></td></tr>
+  </table></div>
+
+  <div class="doc"><div class="doc-bar">.github/skills/add-endpoint/SKILL.md<span class="state">new</span></div><div class="doc-body"><span class="md-c">---</span>
+<span class="md-k">name</span>: <span class="md-s">add-endpoint</span>
+<span class="md-k">description</span>: <span class="md-s">Add or change a ShipTrack REST endpoint: Pydantic v2 schema, SQLAlchemy 2 query, router, Alembic migration if needed, and pytest tests. Use whenever a task adds or modifies an HTTP route.</span>
+<span class="md-k">argument-hint</span>: <span class="md-s">"METHOD /path, e.g. POST /shipments/{id}/events"</span>
+<span class="md-c">---</span>
+<span class="md-h"># Add a ShipTrack endpoint</span>
+
+<span class="md-h">## Steps</span>
+1. Read app/routers/ and app/schemas/ to match existing style.
+2. Add request/response models in app/schemas/ (Pydantic v2, model_config = ConfigDict(from_attributes=True)).
+3. Add the query in app/repositories/ using SQLAlchemy 2 select() style; no raw SQL.
+4. If the table changes, create a migration: alembic revision --autogenerate -m "&lt;summary&gt;".
+5. Add the route in the matching router; return 404 with {"detail": "..."} when not found.
+6. Write tests in tests/test_&lt;router&gt;.py: happy path, 404, 422.
+7. Run: ruff check . &amp;&amp; ruff format --check . &amp;&amp; pytest -q
+
+<span class="md-h">## Done when</span>
+- All commands in step 7 pass.
+- The endpoint appears in /docs with an example.</div></div>
+
+  <h3 class="subsection">Frontmatter rules</h3>
+  <ul class="body">
+    <li><code>name</code> (required): in VS Code use lowercase letters, numbers and hyphens, at most 64 characters, and match the folder name. The CLI is looser, but follow the strict rule so both work.</li>
+    <li><code>description</code> (required, up to 1,024 characters): the model reads this to decide when to use the skill, so say <em>when</em>, not only <em>what</em>.</li>
+    <li>Optional: <code>argument-hint</code>, <code>user-invocable</code>, <code>disable-model-invocation</code>; the CLI also reads <code>allowed-tools</code>.</li>
+  </ul>
+
+  <h3 class="subsection">Use it</h3>
+  <div class="terminal typer"><div class="terminal-header"><div class="terminal-dots"><div class="dot dot-r"></div><div class="dot dot-y"></div><div class="dot dot-g"></div></div><div class="terminal-title">bash — shiptrack</div><button class="run-btn">▶ Run</button></div><div class="terminal-body">
+<span class="l"><span class="t-prompt">›</span> <span class="t-cmd">/skills list</span></span>
+<span class="l t-output" data-wait="500">  add-endpoint   Add or change a ShipTrack REST endpoint ... (project)</span>
+<span class="l"> </span>
+<span class="l"><span class="t-prompt">›</span> <span class="t-cmd">/add-endpoint GET /shipments/{id}/events</span></span>
+<span class="l t-info" data-wait="700">● Using skill: add-endpoint</span>
+<span class="l t-output">● Read app/routers/shipments.py, app/schemas/shipment.py</span>
+<span class="l t-output">● Edit app/schemas/event.py, app/repositories/events.py, app/routers/shipments.py</span>
+<span class="l t-output">● Create tests/test_shipment_events.py</span>
+<span class="l t-warn">? Run: ruff check . &amp;&amp; ruff format --check . &amp;&amp; pytest -q   [allow once / session / repo]</span>
+<span class="l t-success" data-wait="900">✓ 9 passed in 1.4s</span>
+</div></div>
+  <p class="body">In VS Code the same skill appears as <code>/add-endpoint</code> in chat. Edit a skill and run <code>/skills reload</code> in the CLI to pick up changes.</p>
+  <div class="callout info"><div class="icon">ℹ️</div><p>Skills replace <strong>prompt files</strong> (<code>.github/prompts/*.prompt.md</code>), which only work in VS Code's deprecated Local harness. A shared marketplace for customizations exists <span class="badge-new">preview</span>; check current docs before relying on it.</p></div>
+</section>
+
+<!-- 4 -->
+<section class="step-panel" data-section="Building blocks" data-title="Custom agents" data-sub=".agent.md personas">
+  <div class="step-header"><div class="phase-tag green">🤖 Agents</div><h2>Custom agents: a persona with limited tools</h2><p>Marco reviews every ShipTrack PR. He wants a <strong>reviewer</strong> agent that reads code and checks it against the team's rules but can never edit a file.</p></div>
+
+  <div class="doc"><div class="doc-bar">.github/agents/reviewer.agent.md<span class="state">new</span></div><div class="doc-body"><span class="md-c">---</span>
+<span class="md-k">name</span>: <span class="md-s">reviewer</span>
+<span class="md-k">description</span>: <span class="md-s">Reviews ShipTrack changes against team standards. Read-only: reports findings, never edits.</span>
+<span class="md-k">tools</span>: [<span class="md-s">'read'</span>, <span class="md-s">'search'</span>]
+<span class="md-k">user-invocable</span>: <span class="md-s">true</span>
+<span class="md-c"># CLI only: load repo instructions when this agent runs as a subagent</span>
+<span class="md-k">include-custom-instructions</span>: <span class="md-s">true</span>
+<span class="md-c">---</span>
+You are a senior reviewer for the ShipTrack FastAPI service.
+
+<span class="md-h">## Check every change for</span>
+- Pydantic v2 schemas at the API boundary; no ORM objects returned directly.
+- SQLAlchemy 2 select() style; sessions from the dependency, never global.
+- Every new endpoint has tests for happy path, 404 and 422.
+- No secrets, tokens or connection strings in code or tests.
+
+<span class="md-h">## Output</span>
+A table: file, line, severity (blocker / should-fix / nit), finding, suggested fix.
+End with READY or NOT READY.</div></div>
+
+  <h3 class="subsection">Frontmatter you will use most</h3>
+  <div class="tbl-wrap"><table class="tbl">
+    <tr><th>Key</th><th>What it does</th></tr>
+    <tr><td><code>name</code>, <code>description</code></td><td>Identity. <code>description</code> is required.</td></tr>
+    <tr><td><code>tools</code></td><td>Allowed tools. Aliases: <code>execute</code> <code>read</code> <code>edit</code> <code>search</code> <code>agent</code> <code>web</code> <code>todo</code> <code>*</code>, or <code>&lt;server&gt;/*</code> for an MCP server.</td></tr>
+    <tr><td><code>model</code>, <code>reasoning-effort</code></td><td>Pin a model (string or list) and effort.</td></tr>
+    <tr><td><code>skills</code>, <code>mcp-servers</code>, <code>hooks</code></td><td>Attach skills, MCP servers and hooks to this agent only.</td></tr>
+    <tr><td><code>user-invocable</code>, <code>disable-model-invocation</code></td><td>Who can start it: you, the model, or both.</td></tr>
+    <tr><td><code>target</code></td><td><code>vscode</code> or <code>github-copilot</code>.</td></tr>
+    <tr><td><code>handoffs</code>, <code>argument-hint</code></td><td class="p">VS Code Local harness only (deprecated).</td></tr>
+  </table></div>
+
+  <h3 class="subsection">Run it</h3>
+  <div data-tabs>
+    <div class="tabs"><button class="tab-btn on" data-tab="vsc">VS Code</button><button class="tab-btn" data-tab="cli">Copilot CLI</button></div>
+    <div class="tab-pane on" data-pane="vsc">
+      <ol class="body">
+        <li>Open the agent picker in the Chat view and choose <strong>reviewer</strong> (or create one with <strong>Chat: New Custom Agent</strong>).</li>
+        <li>Ask: <em>Review the changes on this branch.</em></li>
+      </ol>
+    </div>
+    <div class="tab-pane" data-pane="cli">
+      <div class="terminal"><div class="terminal-header"><div class="terminal-dots"><div class="dot dot-r"></div><div class="dot dot-y"></div><div class="dot dot-g"></div></div><div class="terminal-title">bash — shiptrack</div></div><div class="terminal-body">
+<span class="l t-comment"># start a session as the reviewer</span>
+<span class="l"><span class="t-prompt">$</span> <span class="t-cmd">copilot --agent reviewer</span></span>
+<span class="l t-comment"># or switch inside a running session</span>
+<span class="l"><span class="t-prompt">›</span> <span class="t-cmd">/agent</span></span>
+</div></div>
+    </div>
+  </div>
+  <ul class="body">
+    <li>Other locations: <code>.claude/agents/*.md</code>, personal <code>~/.copilot/agents/</code> and <code>~/.claude/agents/</code>. Old <code>.chatmode.md</code> files: rename to <code>.agent.md</code>.</li>
+    <li>In the CLI, an agent in a subfolder gets an ID with <code>/</code> replaced by <code>--</code> (for example <code>agents/api/reviewer.agent.md</code> → <code>api--reviewer</code>).</li>
+    <li>The CLI also ships built-in subagents such as <code>code-review</code>, <code>explore</code> and <code>security-review</code>.</li>
+  </ul>
+</section>
+
+<!-- 5 -->
+<section class="step-panel" data-section="Building blocks" data-title="Tools &amp; approvals" data-sub="What it may do">
+  <div class="step-header"><div class="phase-tag amber">🔧 Tools</div><h2>Tools: what the agent can do, and who says yes</h2><p>Agents act through tools: read files, edit, run shell commands, fetch URLs, call MCP servers. You decide which tools exist in a session and which ones need your approval.</p></div>
+
+  <div class="cards">
+    <div class="card blue"><h4>VS Code</h4><p>Pick tools with the tool picker in chat, or limit them in an agent's <code>tools:</code> list. MCP tools appear alongside built-in ones.</p></div>
+    <div class="card purple"><h4>Copilot CLI</h4><p>Tool kinds: <code>shell</code>, <code>read</code>, <code>write</code>, <code>url</code>, and MCP tools as <code>Server(tool)</code>. <code>/env</code> lists what is loaded.</p></div>
+  </div>
+
+  <h3 class="subsection">Approval levels</h3>
+  <div class="tbl-wrap"><table class="tbl">
+    <tr><th>Surface</th><th>Safest</th><th>Middle</th><th>Riskiest</th></tr>
+    <tr><td><strong>VS Code</strong> (<code>chat.permissions.default</code>)</td><td class="y">Manual (default)</td><td class="p">Assisted: a safety model judges each call</td><td class="n">Allow all / Autopilot</td></tr>
+    <tr><td><strong>CLI</strong> (<code>/permissions</code>)</td><td class="y">Default: reads auto-allowed, writes/shell/URLs prompt</td><td class="p"><code>/permissions assisted</code></td><td class="n"><code>/allow-all</code> (<code>/yolo</code>)</td></tr>
+  </table></div>
+  <p class="body">When the CLI prompts, you can approve once, for the session, or remember for this repo (saved in <code>~/.copilot/permissions-config.json</code>). In VS Code, <strong>Chat: Manage Tool Approval</strong> and <strong>Chat: Reset Tool Confirmations</strong> manage saved approvals.</p>
+
+  <h3 class="subsection">Allow and deny lists in the CLI</h3>
+  <p class="body">Marco runs ShipTrack tasks with git, ruff and pytest pre-approved, and <code>git push</code> blocked outright:</p>
+  <div class="terminal typer"><div class="terminal-header"><div class="terminal-dots"><div class="dot dot-r"></div><div class="dot dot-y"></div><div class="dot dot-g"></div></div><div class="terminal-title">bash — shiptrack</div><button class="run-btn">▶ Run</button></div><div class="terminal-body">
+<span class="l"><span class="t-prompt">$</span> <span class="t-cmd">copilot --allow-tool='shell(git:*)' --allow-tool='shell(ruff:*)' --allow-tool='shell(pytest:*)' --deny-tool='shell(git push)'</span></span>
+<span class="l"><span class="t-prompt">›</span> <span class="t-cmd">Fix the failing test in tests/test_shipments.py and commit</span></span>
+<span class="l t-output" data-wait="700">● shell: pytest -q tests/test_shipments.py      (allowed by --allow-tool)</span>
+<span class="l t-output">● edit: app/routers/shipments.py               (prompted: allow once)</span>
+<span class="l t-output">● shell: git commit -am "Return 404 for unknown shipment"   (allowed)</span>
+<span class="l t-error" data-wait="600">✗ shell: git push   denied by --deny-tool</span>
+<span class="l t-comment"># a read-only review session: no file writes at all</span>
+<span class="l"><span class="t-prompt">$</span> <span class="t-cmd">copilot --agent reviewer --deny-tool=write</span></span>
+</div></div>
+  <div class="callout danger"><div class="icon">⛔</div><p><strong>Deny always wins</strong>, even over <code>--allow-all</code>. But <code>--allow-all</code>/<code>/yolo</code> without denies means a shell command can do anything your user account can: push, delete, call the network. Use it only in a sandbox or disposable worktree. See <a href="Copilot_Sim_Security.html">5 · Security</a>.</p></div>
+</section>
+
+<!-- 6 -->
+<section class="step-panel" data-section="Building blocks" data-title="Hooks" data-sub="Deterministic guardrails">
+  <div class="step-header"><div class="phase-tag coral">🪝 Hooks</div><h2>Hooks: run your own code at fixed moments</h2><p>Instructions ask; hooks enforce. A hook is a command (or HTTP call) that runs on a lifecycle event. The same JSON format works in the VS Code Copilot harness, the CLI, the Copilot app and the cloud agent.</p></div>
+
+  <h3 class="subsection">Events you will use</h3>
+  <div class="tbl-wrap"><table class="tbl">
+    <tr><th>Event</th><th>Fires</th><th>Typical use</th></tr>
+    <tr><td><code>sessionStart</code> / <code>sessionEnd</code></td><td>Session begins / ends</td><td>Print context, write an audit line</td></tr>
+    <tr><td><code>userPromptSubmitted</code></td><td>You send a prompt</td><td>Log or block prompts containing secrets</td></tr>
+    <tr><td><code>preToolUse</code></td><td>Before a tool runs</td><td>Allow, deny or ask, with a reason</td></tr>
+    <tr><td><code>postToolUse</code></td><td>After a tool succeeds</td><td>Format/lint; return <code>additionalContext</code></td></tr>
+    <tr><td><code>agentStop</code>, <code>subagentStop</code></td><td>An agent finishes</td><td>Final checks</td></tr>
+    <tr><td><code>errorOccurred</code>, <code>preCompact</code></td><td>Errors; before context compaction</td><td>Alerts, saving notes</td></tr>
+  </table></div>
+  <p class="body">Also available: <code>postToolUseFailure</code>, <code>subagentStart</code>, <code>userPromptTransformed</code>, <code>permissionRequest</code>, <code>notification</code>. PascalCase names (for example <code>PreToolUse</code>) are Claude-style aliases with a different payload shape.</p>
+
+  <h3 class="subsection">Example: keep ShipTrack ruff-clean after every edit</h3>
+  <div class="doc"><div class="doc-bar">.github/hooks/ruff.json<span class="state">new</span></div><div class="doc-body">{
+  <span class="md-k">"version"</span>: 1,
+  <span class="md-k">"hooks"</span>: {
+    <span class="md-k">"postToolUse"</span>: [
+      {
+        <span class="md-k">"type"</span>: <span class="md-s">"command"</span>,
+        <span class="md-k">"bash"</span>: <span class="md-s">"ruff check --fix --quiet . 1&gt;&amp;2; ruff format --quiet . 1&gt;&amp;2; echo '{}'"</span>,
+        <span class="md-k">"powershell"</span>: <span class="md-s">"ruff check --fix --quiet . *&gt; $null; ruff format --quiet . *&gt; $null; '{}'"</span>,
+        <span class="md-k">"cwd"</span>: <span class="md-s">"."</span>,
+        <span class="md-k">"timeoutSec"</span>: 30
+      }
+    ]
+  }
+}</div></div>
+  <ul class="body">
+    <li><strong>I/O contract:</strong> the event payload arrives as JSON on stdin; the hook must print exactly one JSON object on stdout. That is why ruff's output goes to stderr and the command ends with <code>{}</code> ("no decision").</li>
+    <li><code>postToolUse</code> fires after every tool call, including reads. Keep the command fast, or call a script that reads the payload and only acts on edits (field names are in the <a href="https://docs.github.com/en/copilot/reference/hooks-reference">hooks reference</a>).</li>
+    <li>A <code>preToolUse</code> hook answers with <code>{"permissionDecision": "deny", "permissionDecisionReason": "…"}</code> (or <code>allow</code>/<code>ask</code>). A reason is required on deny.</li>
+  </ul>
+
+  <h3 class="subsection">Failure rules (read twice)</h3>
+  <div class="tbl-wrap"><table class="tbl">
+    <tr><th>Situation</th><th>Result</th></tr>
+    <tr><td>Exit code <code>2</code></td><td>Warning by default; <strong>deny</strong> for <code>preToolUse</code> and <code>permissionRequest</code></td></tr>
+    <tr><td><code>preToolUse</code> command crashes or exits non-zero</td><td class="y">Fail closed: tool blocked</td></tr>
+    <tr><td>Any hook times out</td><td class="p">Fail open: normal permissions apply</td></tr>
+    <tr><td>HTTP <code>preToolUse</code> hook fails</td><td class="p">Fail open</td></tr>
+    <tr><td>Any hook says deny</td><td class="y">Tool blocked</td></tr>
+  </table></div>
+
+  <h3 class="subsection">Where hooks are loaded from</h3>
+  <ul class="body">
+    <li>Repo: <code>.github/hooks/*.json</code> (the only source the cloud agent uses, Linux/bash). Personal: <code>~/.copilot/hooks/*.json</code>.</li>
+    <li>Inline <code>hooks</code> key in <code>.github/copilot/settings(.local).json</code>, <code>~/.copilot/settings.json</code> or <code>.claude/settings*.json</code>; plugin <code>hooks.json</code>; managed policy folders.</li>
+    <li>All sources run together. <code>"disableAllHooks": true</code> skips one file (policy hooks still run). In VS Code, <code>/hooks</code> opens the hooks UI. In the CLI, repo hooks need a trusted folder.</li>
+  </ul>
+</section>
+
+<!-- 7 -->
+<section class="step-panel" data-section="Building blocks" data-title="MCP servers" data-sub="Connect outside systems">
+  <div class="step-header"><div class="phase-tag teal">🔌 MCP</div><h2>MCP: plug in tools from other systems</h2><p>The Model Context Protocol lets a server expose tools (and sometimes resources) to the agent: GitHub issues, a database, a ticketing system. Servers run locally over <strong>stdio</strong> (<code>command</code>, <code>args</code>, <code>env</code>) or remotely over <strong>HTTP</strong> (<code>http</code>, alias <code>streamable-http</code>) or SSE.</p></div>
+
+  <div class="callout warn"><div class="icon">⚠️</div><p><strong>Two config formats exist.</strong> The CLI and VS Code's Copilot harness use a top-level <code>"mcpServers"</code> key. VS Code's deprecated Local harness uses <code>"servers"</code> in <code>.vscode/mcp.json</code>. Same idea, different key, and some fields don't carry over.</p></div>
+
+  <div data-tabs>
+    <div class="tabs">
+      <button class="tab-btn on" data-tab="mcps">mcpServers (CLI + Copilot harness)</button>
+      <button class="tab-btn" data-tab="srv">servers (VS Code Local)</button>
+      <button class="tab-btn" data-tab="gh">Built-in GitHub MCP (CLI)</button>
+    </div>
+    <div class="tab-pane on" data-pane="mcps">
+      <div class="doc"><div class="doc-bar">.mcp.json (repo root)<span class="state">committed</span></div><div class="doc-body">{
+  <span class="md-k">"mcpServers"</span>: {
+    <span class="md-k">"github"</span>: {
+      <span class="md-k">"type"</span>: <span class="md-s">"http"</span>,
+      <span class="md-k">"url"</span>: <span class="md-s">"https://api.githubcopilot.com/mcp/"</span>
+    }
+  }
+}</div></div>
+      <ul class="body">
+        <li>CLI files: project <code>.mcp.json</code> or <code>.github/mcp.json</code>; personal <code>~/.copilot/mcp-config.json</code>. Project files load only in a <strong>trusted folder</strong>.</li>
+        <li>Priority, high to low: <code>--additional-mcp-config</code>, plugin servers, workspace files, user file.</li>
+        <li>VS Code Copilot harness reads the same Copilot user config ("Copilot Global") and a workspace-root <code>.mcp.json</code> <span class="badge-new">experimental</span> (<code>chat.mcp.workspaceRootConfig.enabled</code> offers it in <strong>MCP: Add Server</strong>).</li>
+        <li>The GitHub server URL is the remote endpoint documented in the <a href="https://github.com/github/github-mcp-server">github/github-mcp-server</a> README; check it for current options and authentication. In the CLI, finish sign-in with <code>/mcp auth</code> if asked.</li>
+      </ul>
+    </div>
+    <div class="tab-pane" data-pane="srv">
+      <div class="doc"><div class="doc-bar">.vscode/mcp.json<span class="state">Local harness · deprecated</span></div><div class="doc-body">{
+  <span class="md-k">"servers"</span>: {
+    <span class="md-k">"github"</span>: {
+      <span class="md-k">"type"</span>: <span class="md-s">"http"</span>,
+      <span class="md-k">"url"</span>: <span class="md-s">"https://api.githubcopilot.com/mcp/"</span>
+    }
+  }
+}</div></div>
+      <ul class="body">
+        <li>Also allowed here: <code>"inputs"</code> (prompted values), <code>"sandbox"</code>, and per-server <code>sandboxEnabled</code>, <code>envFile</code>, <code>dev</code>. <strong>Do not</strong> copy <code>inputs</code>, <code>envFile</code> or <code>dev</code> into an <code>mcpServers</code> file.</li>
+        <li>Migrate to the shared format with one command:</li>
+      </ul>
+      <div class="terminal"><div class="terminal-header"><div class="terminal-dots"><div class="dot dot-r"></div><div class="dot dot-y"></div><div class="dot dot-g"></div></div><div class="terminal-title">bash — shiptrack</div></div><div class="terminal-body">
+<span class="l"><span class="t-prompt">$</span> <span class="t-cmd">jq '{mcpServers: .servers}' .vscode/mcp.json &gt; .mcp.json</span></span>
+</div></div>
+    </div>
+    <div class="tab-pane" data-pane="gh">
+      <p class="body">The CLI ships the GitHub MCP server (<code>github-mcp-server</code>) <strong>enabled by default</strong> with a default toolset, so Marco needs no config to work with issues and PRs from the terminal.</p>
+      <div class="terminal typer"><div class="terminal-header"><div class="terminal-dots"><div class="dot dot-r"></div><div class="dot dot-y"></div><div class="dot dot-g"></div></div><div class="terminal-title">bash — shiptrack</div><button class="run-btn">▶ Run</button></div><div class="terminal-body">
+<span class="l"><span class="t-prompt">›</span> <span class="t-cmd">/mcp list</span></span>
+<span class="l t-output" data-wait="500">  github-mcp-server   built-in   enabled</span>
+<span class="l"><span class="t-prompt">›</span> <span class="t-cmd">Summarise open issues labelled "api" in northwind/shiptrack</span></span>
+<span class="l t-output" data-wait="800">● github-mcp-server(list_issues)   (prompted: allow for session)</span>
+<span class="l t-output">  #12 GET /shipments/{id}/events returns 500 for unknown id</span>
+<span class="l t-output">  #15 Add pagination to GET /shipments</span>
+<span class="l t-comment"># more GitHub tools: --enable-all-github-mcp-tools or --add-github-mcp-toolset</span>
+<span class="l t-comment"># turn built-ins off: --disable-builtin-mcps</span>
+</div></div>
+    </div>
+  </div>
+
+  <h3 class="subsection">Adding servers without editing JSON</h3>
+  <ul class="body">
+    <li><strong>VS Code:</strong> <strong>MCP: Add Server</strong>, <strong>MCP: Browse MCP Servers</strong>, or <strong>Chat: Open Customizations</strong> → MCP Servers.</li>
+    <li><strong>CLI:</strong> <code>/mcp add</code>, <code>/mcp edit</code>, <code>/mcp disable</code>, <code>/mcp reload</code>, or the <code>copilot mcp</code> subcommand.</li>
+  </ul>
+  <div class="callout danger"><div class="icon">⛔</div><p>MCP servers can return text that tries to steer the agent (prompt injection), and stdio servers run code on your machine. Use servers your org has approved, keep tool approvals on, and never commit tokens into MCP files. Organisations can disable MCP or enforce an allowlist.</p></div>
+</section>
+
+<!-- 8 -->
+<section class="step-panel" data-section="Putting it together" data-title="VS Code vs CLI loading" data-sub="Who reads what">
+  <div class="step-header"><div class="phase-tag purple">⚖️ Compare</div><h2>How VS Code and the CLI load each item</h2><p>The shared <code>.github/</code> files work in both. The differences are mostly about the deprecated Local harness and the CLI's trust gate.</p></div>
+
+  <div class="tbl-wrap"><table class="tbl">
+    <tr><th>Item</th><th>VS Code · Copilot harness</th><th>VS Code · Local (deprecated)</th><th>Copilot CLI</th></tr>
+    <tr><td><strong>Repo instructions</strong> (<code>.github/copilot-instructions.md</code>, <code>AGENTS.md</code>, <code>.github/instructions/</code>)</td><td class="y">Yes</td><td class="y">Yes (toggled by <code>chat.use*</code> settings)</td><td class="y">Yes, all locations merged (Git root + cwd)</td></tr>
+    <tr><td><strong>Personal instructions</strong> (<code>~/.copilot/</code>)</td><td class="y">Yes</td><td class="y">Yes</td><td class="y">Yes, plus <code>COPILOT_CUSTOM_INSTRUCTIONS_DIRS</code></td></tr>
+    <tr><td><strong>Prompt files</strong> (<code>.github/prompts/</code>)</td><td class="n">No: use skills</td><td class="y">Yes</td><td class="n">No: use skills</td></tr>
+    <tr><td><strong>Skills</strong> (<code>.github/skills/</code>)</td><td class="y">Yes, as <code>/name</code></td><td class="y">Yes</td><td class="y">Yes, <code>/name</code>, <code>/skills</code></td></tr>
+    <tr><td><strong>Custom agents</strong> (<code>.github/agents/</code>)</td><td class="y">Agent picker</td><td class="y">Agent picker, plus <code>handoffs</code></td><td class="y"><code>/agent</code>, <code>--agent</code></td></tr>
+    <tr><td><strong>Hooks</strong> (<code>.github/hooks/</code>)</td><td class="y">Yes, <code>/hooks</code> UI</td><td class="p">Via <code>chat.useHooks</code>, <code>chat.hookFilesLocations</code></td><td class="y">Yes, in trusted folders</td></tr>
+    <tr><td><strong>MCP</strong></td><td class="y"><code>mcpServers</code>: Copilot Global + <code>.mcp.json</code></td><td class="p"><code>servers</code> in <code>.vscode/mcp.json</code></td><td class="y"><code>mcpServers</code>: <code>.mcp.json</code>, <code>.github/mcp.json</code>, <code>~/.copilot/mcp-config.json</code></td></tr>
+    <tr><td><strong>Plugins</strong></td><td class="p">Agent plugins (check current docs)</td><td class="n">—</td><td class="y"><code>/plugin</code>, <code>copilot plugin</code></td></tr>
+    <tr><td><strong>See what loaded</strong></td><td>Chat: Open Customizations</td><td>Chat: Open Customizations</td><td><code>/env</code>, <code>/instructions</code>, <code>copilot instruction list</code></td></tr>
+  </table></div>
+
+  <div class="callout tip"><div class="icon">💡</div><p>In <code>copilot -p</code> (scripted) mode, repo hooks, workspace MCP and extensions are <strong>off</strong> unless you set <code>GITHUB_COPILOT_PROMPT_MODE_REPO_HOOKS</code>, <code>GITHUB_COPILOT_PROMPT_MODE_WORKSPACE_MCP</code> or <code>GITHUB_COPILOT_PROMPT_MODE_EXTENSIONS</code> to <code>true</code>. A common CI surprise.</p></div>
+  <p class="body">More side-by-side detail: <a href="Copilot_VSCode_vs_CLI.html">9 · VS Code agents vs CLI</a>.</p>
+</section>
+
+<!-- 9 -->
+<section class="step-panel" data-section="Putting it together" data-title="Hands-on lab" data-sub="Customize ShipTrack">
+  <div class="step-header"><div class="phase-tag green">🧪 Lab</div><h2>Lab: give ShipTrack a skill, a reviewer, a hook and MCP</h2><p>About 40 minutes. Use a branch of <code>northwind/shiptrack</code> (or any small FastAPI repo). Your progress is saved in this browser.</p></div>
+
+  <ul class="track" data-key="customize-lab" data-meter="lab-meter">
+    <li><div><strong>1. Instructions.</strong> Run <code>/init</code> in the CLI, then trim <code>.github/copilot-instructions.md</code> to ten lines of real ShipTrack rules. Add <code>tests.instructions.md</code> from Step 2.</div></li>
+    <li><div><strong>2. Skill.</strong> Create <code>.github/skills/add-endpoint/SKILL.md</code> from Step 3. Check it appears in <code>/skills list</code> and as <code>/add-endpoint</code> in VS Code chat.</div></li>
+    <li><div><strong>3. Agent.</strong> Create <code>.github/agents/reviewer.agent.md</code> from Step 4. Ask it to edit a file and confirm it can't.</div></li>
+    <li><div><strong>4. Hook.</strong> Add <code>.github/hooks/ruff.json</code> from Step 6. Ask the agent to add a badly formatted line; confirm ruff fixed it.</div></li>
+    <li><div><strong>5. Approvals.</strong> Start the CLI with the allow/deny flags from Step 5 and ask it to push. Confirm the deny.</div></li>
+    <li><div><strong>6. MCP.</strong> In the CLI run <code>/mcp list</code>; in VS Code add the GitHub server with <strong>MCP: Add Server</strong>. Ask both for open issues.</div></li>
+    <li><div><strong>7. Put it together.</strong> Run the flow below, then open a PR with all the new files for Marco to review.</div></li>
+  </ul>
+  <p class="track-meter" id="lab-meter"></p>
+
+  <h3 class="subsection">Step 7 in VS Code</h3>
+  <div class="chat reveal"><div class="chat-header copilot">🤖 VS Code · Copilot Chat <span class="tag">Agent · shiptrack</span></div><div class="chat-body">
+    <div class="msg user"><div class="who">Priya</div><div class="bubble">/add-endpoint POST /shipments/{id}/events</div></div>
+    <div class="msg ai"><div class="who">Copilot</div><div class="bubble">Using the <strong>add-endpoint</strong> skill. Plan: add <code>EventCreate</code>/<code>EventRead</code> schemas, an insert in <code>app/repositories/events.py</code>, the route in <code>app/routers/shipments.py</code>, an Alembic migration for <code>shipment_events</code>, and tests for 201, 404 and 422.</div></div>
+    <div class="msg hook"><div class="who">Hook · postToolUse</div><div class="bubble">ruff.json ran after each edit: 2 import-order fixes, 1 file reformatted.</div></div>
+    <div class="msg ai"><div class="who">Copilot</div><div class="bubble">Run <code>ruff check . &amp;&amp; ruff format --check . &amp;&amp; pytest -q</code>? <em>(Allow / Skip)</em><br>→ Allowed. <strong>12 passed.</strong></div></div>
+    <div class="msg user"><div class="who">Priya</div><div class="bubble">Switch to the <strong>reviewer</strong> agent: review the changes on this branch.</div></div>
+    <div class="msg ai"><div class="who">reviewer</div><div class="bubble">1 should-fix: <code>app/routers/shipments.py</code> returns the ORM object directly from the new route; return <code>EventRead</code> instead. No blockers. <strong>NOT READY</strong> until fixed.</div></div>
+  </div></div>
+
+  <div class="gate"><div class="gate-title">✅ You are done when</div><span class="opt">skill runs from /add-endpoint</span><span class="opt">reviewer cannot edit</span><span class="opt">ruff hook fires after edits</span><span class="opt">git push is denied</span><span class="opt">GitHub MCP lists issues</span></div>
+</section>
+
+<!-- 10 -->
+<section class="step-panel" data-section="Putting it together" data-title="Where to go next" data-sub="Keep going">
+  <div class="step-header"><div class="phase-tag teal">🧭 Next</div><h2>Where to go next</h2><p>Your repo now carries its own skills, reviewer, guardrails and connections. Put them to work.</p></div>
+  <div class="cards">
+    <div class="card coral"><h4><a href="Copilot_Sim_Security.html">🛡️ Security, sandboxing, worktrees</a></h4><p>Harden approvals, sandbox agents and isolate parallel work.</p></div>
+    <div class="card green"><h4><a href="Copilot_Sim_Greenfield.html">🌱 Greenfield: ShipTrack</a></h4><p>Use these customizations to build the API end to end.</p></div>
+    <div class="card amber"><h4><a href="Copilot_Sim_Brownfield.html">🏢 Brownfield: Ledgerly</a></h4><p>Write AGENTS.md and skills for a legacy Django monolith.</p></div>
+    <div class="card purple"><h4><a href="Copilot_Sim_Knowledge.html">🧠 Knowledge &amp; learning loop</a></h4><p>Instructions, AGENTS.md and Copilot Memory in depth.</p></div>
+    <div class="card blue"><h4><a href="Copilot_VSCode_vs_CLI.html">⚖️ VS Code vs CLI</a></h4><p>Same task, both surfaces.</p></div>
+    <div class="card teal"><h4><a href="Copilot_Training.html">🎓 Training path</a></h4><p>Labs and a knowledge check.</p></div>
+  </div>
+  <p class="body">Official docs: <a href="https://code.visualstudio.com/docs/agent-customization/agent-skills">Agent skills</a> · <a href="https://code.visualstudio.com/docs/agent-customization/custom-agents">Custom agents</a> · <a href="https://code.visualstudio.com/docs/agent-customization/hooks">Hooks in VS Code</a> · <a href="https://docs.github.com/en/copilot/reference/hooks-reference">Hooks reference</a> · <a href="https://code.visualstudio.com/docs/agent-customization/mcp-servers">MCP servers</a> · <a href="https://docs.github.com/en/copilot/reference/copilot-cli-reference/cli-command-reference">CLI command reference</a>.</p>
+</section>
+
+    </div>
+  </main>
+</div>
+<script src="assets/copilot-sim.js?v=1"></script>
+<script src="assets/copilot-kit.js?v=1"></script>
+</body>
+</html>

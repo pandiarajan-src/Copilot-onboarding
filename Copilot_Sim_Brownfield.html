@@ -1,0 +1,398 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>7 · Brownfield with GitHub Copilot: changing Ledgerly safely</title>
+<meta name="description" content="Step-by-step simulator: the Northwind Logistics team uses GitHub Copilot in VS Code and the Copilot CLI to understand, document, test, extend and refactor Ledgerly, a 9-year-old Django invoicing monolith.">
+<link rel="stylesheet" href="assets/copilot-sim.css?v=1">
+<link rel="stylesheet" href="assets/copilot-kit.css?v=1">
+</head>
+<body>
+<header class="sim-header">
+  <div class="icon">🏢</div>
+  <div>
+    <h1>7 · Brownfield: changing Ledgerly safely</h1>
+    <p>Understand an unfamiliar Django monolith, write down what you learn, pin its behaviour with tests, then add a feature and refactor in small, reversible steps.</p>
+    <div class="stack-pills"><span class="pill">Updated November 2026</span><span class="pill">VS Code · Ask &amp; Agent</span><span class="pill">GitHub Copilot CLI</span><span class="pill">Django 3.2 → 4.2</span><span class="pill">Celery · PostgreSQL</span><span class="pill">~60k lines · ~30% coverage</span></div>
+  </div>
+  <a class="home-link" href="index.html">⌂ All guides</a>
+</header>
+<div class="sim-body">
+  <nav class="sidebar" id="steps-nav" aria-label="Steps"></nav>
+  <main class="main-area">
+    <div class="progress-bar-container">
+      <div class="progress-bar-outer"><div class="progress-bar-inner" id="progress"></div></div>
+      <div class="progress-label" id="progress-label">Step 1</div>
+    </div>
+    <div class="step-content-area">
+
+<!-- 1 -->
+<section class="step-panel" data-section="Scenario" data-title="The situation" data-sub="Ledgerly and its risks">
+  <div class="step-header"><div class="phase-tag amber">🏢 Scenario</div><h2>Old code, real money, thin tests</h2><p>Ledgerly has issued Northwind's invoices for nine years. Nobody on the current team wrote most of it. Finance wants a CSV export, and Marco wants the worst file in the repo split up before anyone adds to it.</p></div>
+  <div class="doc"><div class="doc-bar">northwind/ledgerly · issue #412<span class="state">requested by Finance · owner: Priya</span></div>
+<div class="doc-body"><span class="md-h">Export invoices as CSV</span>
+Finance copies invoice data out of the admin by hand every month-end.
+<span class="md-k">Request:</span> GET /reports/invoices.csv?from=YYYY-MM-DD&amp;to=YYYY-MM-DD
+<span class="md-k">Columns:</span> number, customer, issued_at, status, net, tax, total, currency
+<span class="md-k">Who:</span> staff with permission to view invoices only
+<span class="md-k">Also (#398, Marco):</span> invoices/views.py is ~600 lines; split it before adding more views.</div></div>
+  <div class="tbl-wrap"><table class="tbl">
+    <tr><th>Fact</th><th>Value</th></tr>
+    <tr><td>Framework</td><td>Django 3.2 (LTS support ended April 2024), upgrade to 4.2 planned</td></tr>
+    <tr><td>Size</td><td>~60k lines; apps <code>billing</code>, <code>customers</code>, <code>invoices</code>, <code>payments</code>, <code>reports</code></td></tr>
+    <tr><td>Async work</td><td>Celery tasks for PDF generation, reminders, payment reconciliation</td></tr>
+    <tr><td>Tests</td><td>Django test runner, ~30% line coverage, almost none on <code>invoices/views.py</code></td></tr>
+  </table></div>
+  <div class="cards">
+    <div class="card coral"><h4>Risk: silent money bugs</h4><p>A rounding or tax change can pass every existing test and still be wrong on real invoices.</p></div>
+    <div class="card coral"><h4>Risk: confident wrong answers</h4><p>Copilot has never seen this repo's history. Its explanations must be checked against code.</p></div>
+    <div class="card amber"><h4>Risk: big-bang changes</h4><p>An agent can rewrite 600 lines in one go. Nobody can review that, and the tests would not catch it.</p></div>
+  </div>
+  <h3 class="subsection">The plan</h3>
+  <div class="flow"><span class="node on">Understand</span><span class="arrow">→</span><span class="node">Write it down</span><span class="arrow">→</span><span class="node">Pin behaviour</span><span class="arrow">→</span><span class="node">Small feature</span><span class="arrow">→</span><span class="node">Refactor in a worktree</span><span class="arrow">→</span><span class="node">Upgrade notes</span><span class="arrow">→</span><span class="node">Review</span></div>
+</section>
+
+<!-- 2 -->
+<section class="step-panel" data-section="Understand" data-title="Onboard to the codebase" data-sub="Leo asks Copilot to explain">
+  <div class="step-header"><div class="phase-tag">🧭 Understand</div><h2>Leo's first day: ask, don't edit</h2><p>Leo joined on Monday. He uses the read-only <strong>Ask</strong> agent in VS Code, so nothing can change while he explores. He asks for file paths with every claim so he can check them.</p></div>
+  <div class="chat reveal">
+    <div class="chat-header copilot">🤖 VS Code · Copilot Chat <span class="tag">Ask · ledgerly</span></div>
+    <div class="chat-body">
+      <div class="msg user"><div class="who">Leo</div><div class="bubble">I'm new to this repo. Read the settings, urls and the five apps, then explain: what each app owns, how an invoice goes from draft to paid, where Celery tasks are defined and what triggers them, and anything unusual. Cite a file path for every claim. Say "not sure" rather than guess.</div></div>
+      <div class="msg ai"><div class="who">Copilot</div><div class="bubble"><strong>Apps</strong><ul><li><code>customers</code>: Customer, BillingContact (<code>customers/models.py</code>)</li><li><code>billing</code>: plans, price rules, tax (<code>billing/tax.py</code>)</li><li><code>invoices</code>: Invoice, InvoiceLine; totals in <code>invoices/services.py</code>; most HTTP handling in <code>invoices/views.py</code></li><li><code>payments</code>: PSP webhooks (<code>payments/webhooks.py</code>), reconciliation</li><li><code>reports</code>: read-only reports (<code>reports/views.py</code>)</li></ul><strong>Lifecycle:</strong> draft → issued (<code>invoices/services.py: issue_invoice</code>) → paid when <code>payments/tasks.py: reconcile_payment</code> matches a webhook.<br><strong>Celery:</strong> tasks in <code>invoices/tasks.py</code> and <code>payments/tasks.py</code>; schedule in <code>ledgerly/celery.py</code> (<code>beat_schedule</code>).<br><strong>Unusual:</strong> <code>invoices/views.py</code> imports from <code>payments.views</code> (circular-ish); a <code>signals.py</code> in invoices sends emails on save. Not sure whether <code>reports</code> reads a replica; <code>DATABASE_ROUTERS</code> is set but I could not find the router class.</div></div>
+      <div class="msg user"><div class="who">Leo</div><div class="bubble">Show me the exact call path when a payment webhook arrives, from URL to the invoice being marked paid.</div></div>
+      <div class="msg ai"><div class="who">Copilot</div><div class="bubble"><code>ledgerly/urls.py</code> → <code>payments/urls.py</code> <code>webhooks/psp/</code> → <code>payments/webhooks.py: psp_webhook</code> (verifies signature, stores <code>PaymentEvent</code>) → <code>reconcile_payment.delay(event.id)</code> → <code>payments/tasks.py: reconcile_payment</code> → <code>invoices/services.py: mark_paid</code> → <code>post_save</code> signal sends the receipt email.</div></div>
+      <div class="msg user"><div class="who">Leo</div><div class="bubble">You said you couldn't find the database router. Search again for any class with db_for_read.</div></div>
+      <div class="msg ai"><div class="who">Copilot</div><div class="bubble">Found it: <code>ledgerly/db_routers.py: ReportsReplicaRouter</code> sends reads from the <code>reports</code> app to the <code>replica</code> database when <code>REPLICA_URL</code> is set. So report queries can lag the primary slightly.</div></div>
+    </div>
+  </div>
+  <div data-tabs>
+    <div class="tabs"><button class="tab-btn on" data-tab="verify">Verify the answers</button><button class="tab-btn" data-tab="cli">Same thing in the CLI</button></div>
+    <div class="tab-pane on" data-pane="verify">
+      <ul class="check-list">
+        <li class="ok"><span class="ci">✓</span><div>Leo opened every cited file. 11 of 12 paths were right; <code>invoices/tasks.py</code> was actually <code>invoices/jobs.py</code>.</div></li>
+        <li class="ok"><span class="ci">✓</span><div>He set a breakpoint in <code>psp_webhook</code> and replayed a test webhook to confirm the call path.</div></li>
+        <li class="ok"><span class="ci">✓</span><div>He asked Marco about the replica router: correct, and a known source of "missing invoice" support tickets.</div></li>
+      </ul>
+    </div>
+    <div class="tab-pane" data-pane="cli">
+      <p class="body">Marco gets the same tour from the terminal. <code>--deny-tool=write</code> blocks file edits for the whole session; <code>@FILE</code> pulls a specific file into context.</p>
+      <div class="terminal">
+        <div class="terminal-header"><div class="terminal-dots"><div class="dot dot-r"></div><div class="dot dot-y"></div><div class="dot dot-g"></div></div><div class="terminal-title">bash — ledgerly</div></div>
+        <div class="terminal-body">
+<span class="l"><span class="t-prompt">$</span> <span class="t-cmd">copilot --deny-tool=write</span></span>
+<span class="l"><span class="t-prompt">&gt;</span> <span class="t-cmd">Using @ledgerly/settings/base.py and @ledgerly/celery.py, list every Celery task, its schedule</span></span>
+<span class="l"><span class="t-cmd">  and what it touches. Cite file paths. Say "not sure" rather than guess.</span></span>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="callout warn"><div class="icon">⚠️</div><p>A fluent explanation is not a correct one. Treat Copilot's tour as a map drawn by a fast reader who has never worked here: useful for orientation, checked before you rely on it.</p></div>
+</section>
+
+<!-- 3 -->
+<section class="step-panel" data-section="Understand" data-title="Write AGENTS.md" data-sub="From discovery, then verified">
+  <div class="step-header"><div class="phase-tag purple">📐 Document</div><h2>Turn what Leo learned into instructions</h2><p>Without written rules, every new chat starts from zero. The team drafts <code>AGENTS.md</code> from the discovery chat, then checks every line before committing it.</p></div>
+  <div class="terminal typer">
+    <div class="terminal-header"><div class="terminal-dots"><div class="dot dot-r"></div><div class="dot dot-y"></div><div class="dot dot-g"></div></div><div class="terminal-title">bash — ledgerly</div><button class="run-btn">▶ Run</button></div>
+    <div class="terminal-body">
+<span class="l"><span class="t-prompt">$</span> <span class="t-cmd">copilot</span></span>
+<span class="l"><span class="t-prompt">&gt;</span> <span class="t-cmd">Draft AGENTS.md at the repo root for Ledgerly: what it is, the five apps, how to run tests,</span></span>
+<span class="l"><span class="t-cmd">  coverage and lint, and the rules a change must follow. Only include commands you can see in</span></span>
+<span class="l"><span class="t-cmd">  the repo (Makefile, tox.ini, CI config). Mark anything you inferred with "(verify)".</span></span>
+<span class="l t-output" data-wait="800">● Read Makefile</span>
+<span class="l t-output">● Read .github/workflows/tests.yml</span>
+<span class="l t-output">● Read setup.cfg   (flake8 config)</span>
+<span class="l t-warn" data-wait="600">? Create file AGENTS.md   once · this session · always in this repo · deny</span>
+<span class="l t-output">  Leo: once</span>
+<span class="l t-success">✓ Created AGENTS.md (2 lines marked "(verify)")</span>
+<span class="l"><span class="t-prompt">&gt;</span> <span class="t-cmd">!python manage.py test invoices --settings=ledgerly.settings.test</span></span>
+<span class="l t-output" data-wait="900">Ran 38 tests in 6.412s</span>
+<span class="l t-success">OK</span>
+    </div>
+  </div>
+  <div class="doc"><div class="doc-bar">AGENTS.md<span class="state">verified by Leo · approved by Marco</span></div>
+<div class="doc-body"><span class="md-h"># Ledgerly: guide for coding agents</span>
+Django 3.2 invoicing monolith (upgrade to 4.2 in progress). PostgreSQL, Celery with Redis.
+
+<span class="md-h">## Apps</span>
+- <span class="md-s">`customers`</span> customers and contacts · <span class="md-s">`billing`</span> plans, prices, tax
+- <span class="md-s">`invoices`</span> invoices; totals ONLY in <span class="md-s">`invoices/services.py`</span>
+- <span class="md-s">`payments`</span> PSP webhooks and reconciliation · <span class="md-s">`reports`</span> read-only, may read a replica
+
+<span class="md-h">## Commands</span>
+- Tests: <span class="md-s">`python manage.py test --settings=ledgerly.settings.test`</span>
+- One app: <span class="md-s">`python manage.py test invoices --settings=ledgerly.settings.test`</span>
+- Coverage: <span class="md-s">`make coverage`</span>
+- Lint: <span class="md-s">`flake8`</span>
+
+<span class="md-h">## Rules</span>
+- Money is <span class="md-s">`Decimal`</span>, never float. Rounding happens in <span class="md-s">`invoices/services.py`</span> only.
+- Before refactoring, add characterization tests. Refactors never change behaviour.
+- Never edit a migration that is already on main.
+- Celery tasks take IDs, not model instances, and must be safe to retry.
+- Stay Django 3.2 compatible and avoid APIs removed in 4.0 until the upgrade PR lands.
+- Ask before adding a dependency.</div></div>
+  <div class="tbl-wrap"><table class="tbl">
+    <tr><th>Draft line</th><th>How Leo checked it</th><th>Result</th></tr>
+    <tr><td>"Tests: <code>pytest</code> (verify)"</td><td>Ran it; no pytest config exists</td><td class="n">Wrong: replaced with the Django runner</td></tr>
+    <tr><td>"Coverage: <code>make coverage</code>"</td><td>Read the Makefile target and ran it</td><td class="y">Correct</td></tr>
+    <tr><td>"Reports may read a replica (verify)"</td><td>Confirmed in <code>db_routers.py</code> and with Marco</td><td class="y">Correct, mark removed</td></tr>
+    <tr><td>Money rules</td><td>Marco added them from experience</td><td class="p">Added by a human</td></tr>
+  </table></div>
+  <div class="callout info"><div class="icon">ℹ️</div><p>Copilot in VS Code and the CLI both read <code>AGENTS.md</code>; the CLI also supports nested <code>AGENTS.md</code> files in subfolders. In VS Code, nested files sit behind an experimental setting that is off by default. CLI <code>/init</code> generates a <code>.github/copilot-instructions.md</code> instead; pick one primary file. See <a href="Copilot_Sim_Knowledge.html">Knowledge &amp; learning loop</a>.</p></div>
+</section>
+
+<!-- 4 -->
+<section class="step-panel" data-section="Safety net" data-title="Characterization tests" data-sub="Pin behaviour before changing it">
+  <div class="step-header"><div class="phase-tag teal">🧷 Safety net</div><h2>Record what the code does today, even if it looks wrong</h2><p>A characterization test asserts current behaviour, not intended behaviour. It turns "I hope nothing changed" into a failing test when something does. Leo writes them, with Priya pairing.</p></div>
+  <div class="chat">
+    <div class="chat-header copilot">🤖 VS Code · Copilot Chat <span class="tag">Agent · ledgerly</span></div>
+    <div class="chat-body">
+      <div class="msg user"><div class="who">Leo</div><div class="bubble">Write characterization tests in invoices/tests/test_characterization.py for invoices/services.py calculate_totals and for the invoice list and detail views in invoices/views.py. Capture current behaviour exactly, including anything that looks like a bug. Do not change any production code. Add a comment "# CURRENT BEHAVIOUR:" on surprising cases and list them at the end. Then run the invoices tests and coverage for invoices/.</div></div>
+      <div class="msg ai"><div class="who">Copilot</div><div class="bubble">Added 21 tests. Surprising behaviour found:<ol><li>The discount is applied <em>after</em> tax, so tax is charged on the undiscounted amount.</li><li>An invoice with zero lines renders a total of <code>None</code>, not <code>0.00</code>.</li><li>The list view shows cancelled invoices to non-staff users.</li></ol>I did not change any production code.</div></div>
+    </div>
+  </div>
+  <div class="doc"><div class="doc-bar">invoices/tests/test_characterization.py (excerpt)</div>
+<div class="doc-body"><span class="md-k">class</span> CalculateTotalsCharacterization(TestCase):
+    <span class="md-k">def</span> test_discount_applied_after_tax(self):
+        invoice = make_invoice(lines=[(<span class="md-s">"100.00"</span>, 1)], tax_rate=<span class="md-s">"0.20"</span>, discount=<span class="md-s">"10.00"</span>)
+        totals = calculate_totals(invoice)
+        <span class="md-c"># CURRENT BEHAVIOUR: tax is on 100.00, not 90.00. Raised with Finance as #415.</span>
+        self.assertEqual(totals.tax, Decimal(<span class="md-s">"20.00"</span>))
+        self.assertEqual(totals.total, Decimal(<span class="md-s">"110.00"</span>))
+
+    <span class="md-k">def</span> test_zero_lines_total_is_none(self):
+        <span class="md-c"># CURRENT BEHAVIOUR: None, not Decimal("0.00").</span>
+        self.assertIsNone(calculate_totals(make_invoice(lines=[])).total)</div></div>
+  <div class="terminal typer">
+    <div class="terminal-header"><div class="terminal-dots"><div class="dot dot-r"></div><div class="dot dot-y"></div><div class="dot dot-g"></div></div><div class="terminal-title">bash — ledgerly</div><button class="run-btn">▶ Run</button></div>
+    <div class="terminal-body">
+<span class="l"><span class="t-prompt">$</span> <span class="t-cmd">coverage run manage.py test invoices --settings=ledgerly.settings.test</span></span>
+<span class="l t-output" data-wait="900">Ran 59 tests in 8.903s</span>
+<span class="l t-success">OK</span>
+<span class="l"><span class="t-prompt">$</span> <span class="t-cmd">coverage report --include="invoices/*" --skip-covered</span></span>
+<span class="l t-output" data-wait="500">Name                    Stmts   Miss  Cover</span>
+<span class="l t-output">-------------------------------------------</span>
+<span class="l t-output">invoices/forms.py          64     22    66%</span>
+<span class="l t-output">invoices/services.py      118     19    84%</span>
+<span class="l t-hl">invoices/views.py         412    151    63%     <span class="t-comment"># was 9%</span></span>
+<span class="l t-output">-------------------------------------------</span>
+<span class="l t-success">TOTAL                     703    208    70%</span>
+    </div>
+  </div>
+  <div class="callout danger"><div class="icon">🚫</div><p><strong>Do not let the agent "fix" what it finds.</strong> The after-tax discount may be a bug, or a contract term with a customer. Log it as an issue, keep the test, and change behaviour only in a separate, deliberate PR.</p></div>
+</section>
+
+<!-- 5 -->
+<section class="step-panel" data-section="Change" data-title="Task A: CSV export" data-sub="Small, incremental, tested">
+  <div class="step-header"><div class="phase-tag">📤 Task A</div><h2>Add /reports/invoices.csv, one small step at a time</h2><p>Priya asks for the smallest change first, follows an existing pattern in <code>reports</code>, and keeps each turn reviewable.</p></div>
+  <div class="chat reveal">
+    <div class="chat-header copilot">🤖 VS Code · Copilot Chat <span class="tag">Agent · ledgerly</span></div>
+    <div class="chat-body">
+      <div class="msg user"><div class="who">Priya</div><div class="bubble">Issue #412: add GET /reports/invoices.csv?from=&amp;to=. Before writing code: what is the smallest change? List the files you would touch and why, and which existing view in reports/ you would copy the pattern from. Then stop.</div></div>
+      <div class="msg ai"><div class="who">Copilot</div><div class="bubble">Smallest change, 4 files:<ol><li><code>reports/forms.py</code>: <code>InvoiceExportForm</code> with <code>from</code>/<code>to</code> dates (matches <code>MonthlySummaryForm</code>).</li><li><code>reports/views.py</code>: <code>invoices_csv</code> view, decorators copied from <code>monthly_summary</code>.</li><li><code>reports/urls.py</code>: one path.</li><li><code>reports/tests/test_invoices_csv.py</code>: new tests.</li></ol>No model or migration changes. I'd stream rows so a full year doesn't load into memory.</div></div>
+      <div class="msg user"><div class="who">Priya</div><div class="bubble">Good. Tests first: header row, one row per invoice in range, 403 without invoices.view_invoice, 400 for a bad date, and a customer named "=SUM(A1)" exported as text. Run them and show me they fail.</div></div>
+      <div class="msg hook"><div class="who">Tool · terminal</div><div class="bubble"><code>python manage.py test reports.tests.test_invoices_csv --settings=ledgerly.settings.test</code><br>FAILED (errors=5): NoReverseMatch 'reports:invoices_csv'. Failing for the right reason.</div></div>
+      <div class="msg user"><div class="who">Priya</div><div class="bubble">Now implement the form, view and URL to make them pass. Don't touch the tests or anything outside reports/. Then run the full reports and invoices suites.</div></div>
+      <div class="msg ai"><div class="who">Copilot</div><div class="bubble">Implemented. <code>reports</code>: 31 passed. <code>invoices</code>: 59 passed, including the characterization tests. Diff: +88 / −0 in 4 files.</div></div>
+    </div>
+  </div>
+  <div class="doc"><div class="doc-bar">reports/views.py (new view)<span class="state">reviewed by Priya and Sam</span></div>
+<div class="doc-body"><span class="md-k">class</span> _Echo:
+    <span class="md-k">def</span> write(self, value):
+        <span class="md-k">return</span> value
+
+
+<span class="md-k">def</span> _cell(value):
+    text = <span class="md-s">""</span> <span class="md-k">if</span> value <span class="md-k">is None else</span> str(value)
+    <span class="md-c"># Stop spreadsheets treating customer text as a formula.</span>
+    <span class="md-k">return</span> <span class="md-s">"'"</span> + text <span class="md-k">if</span> text[:1] <span class="md-k">in</span> (<span class="md-s">"="</span>, <span class="md-s">"+"</span>, <span class="md-s">"-"</span>, <span class="md-s">"@"</span>) <span class="md-k">else</span> text
+
+
+@login_required
+@permission_required(<span class="md-s">"invoices.view_invoice"</span>, raise_exception=True)
+<span class="md-k">def</span> invoices_csv(request):
+    form = InvoiceExportForm(request.GET)
+    <span class="md-k">if not</span> form.is_valid():
+        <span class="md-k">return</span> HttpResponseBadRequest(<span class="md-s">"Invalid date range"</span>)
+    invoices = (
+        Invoice.objects.select_related(<span class="md-s">"customer"</span>)
+        .filter(issued_at__date__range=(form.cleaned_data[<span class="md-s">"from"</span>], form.cleaned_data[<span class="md-s">"to"</span>]))
+        .order_by(<span class="md-s">"issued_at"</span>)
+        .iterator(chunk_size=2000)
+    )
+    writer = csv.writer(_Echo())
+    rows = chain([HEADER], (_row(inv) <span class="md-k">for</span> inv <span class="md-k">in</span> invoices))
+    response = StreamingHttpResponse((writer.writerow(r) <span class="md-k">for</span> r <span class="md-k">in</span> rows), content_type=<span class="md-s">"text/csv"</span>)
+    response[<span class="md-s">"Content-Disposition"</span>] = <span class="md-s">'attachment; filename="invoices.csv"'</span>
+    <span class="md-k">return</span> response</div></div>
+  <div class="callout tip"><div class="icon">🛡️</div><p>The CSV-injection test came from Sam. Copilot did not suggest it unprompted. Domain and security knowledge still comes from people; put it in the prompt or in <code>AGENTS.md</code> so the next change gets it for free.</p></div>
+</section>
+
+<!-- 6 -->
+<section class="step-panel" data-section="Change" data-title="Task B: refactor views.py" data-sub="Small steps in a git worktree">
+  <div class="step-header"><div class="phase-tag purple">🧹 Task B</div><h2>Split the 600-line invoices/views.py without changing behaviour</h2><p>Priya runs the refactor in a separate git worktree so her main checkout stays free for the CSV PR. One extraction per prompt, tests after each, a commit after each green run.</p></div>
+  <div class="terminal typer">
+    <div class="terminal-header"><div class="terminal-dots"><div class="dot dot-r"></div><div class="dot dot-y"></div><div class="dot dot-g"></div></div><div class="terminal-title">bash — ledgerly</div><button class="run-btn">▶ Run</button></div>
+    <div class="terminal-body">
+<span class="l"><span class="t-prompt">$</span> <span class="t-cmd">git worktree add ../ledgerly-views-refactor -b refactor/invoice-views</span></span>
+<span class="l t-output">Preparing worktree (new branch 'refactor/invoice-views')</span>
+<span class="l"><span class="t-prompt">$</span> <span class="t-cmd">cd ../ledgerly-views-refactor</span></span>
+<span class="l"><span class="t-prompt">$</span> <span class="t-cmd">cp ../ledgerly/.env .env</span>   <span class="t-comment"># git-ignored files are not in a new worktree</span></span>
+<span class="l"><span class="t-prompt">$</span> <span class="t-cmd">copilot</span></span>
+<span class="l"><span class="t-prompt">&gt;</span> <span class="t-cmd">Refactor @invoices/views.py in small steps. Step 1 only: move the PDF helpers</span></span>
+<span class="l"><span class="t-cmd">  (render_invoice_pdf, _pdf_context) to invoices/pdf.py and update imports. No behaviour</span></span>
+<span class="l"><span class="t-cmd">  change, no renames. Run the invoices tests, then stop.</span></span>
+<span class="l t-success" data-wait="900">✓ Created invoices/pdf.py · Edited invoices/views.py, invoices/jobs.py</span>
+<span class="l t-output">  Ran 59 tests ... OK</span>
+<span class="l"><span class="t-prompt">&gt;</span> <span class="t-cmd">!git commit -am "refactor(invoices): extract PDF helpers"</span></span>
+<span class="l"><span class="t-prompt">&gt;</span> <span class="t-cmd">Step 2 only: move query building for the list view into invoices/selectors.py.</span></span>
+<span class="l t-success" data-wait="900">✓ Created invoices/selectors.py · Edited invoices/views.py</span>
+<span class="l t-error">  Ran 59 tests ... FAILED (failures=1) test_list_hides_cancelled_for_staff</span>
+<span class="l t-info" data-wait="700">  The old code filtered cancelled invoices after a staff check; my selector applied it</span>
+<span class="l t-info">  before. Restoring the original order inside list_invoices().</span>
+<span class="l t-output">  Ran 59 tests ... OK</span>
+<span class="l"><span class="t-prompt">&gt;</span> <span class="t-cmd">!git commit -am "refactor(invoices): extract list selectors"</span></span>
+<span class="l t-comment"># steps 3–5 follow the same loop</span>
+    </div>
+  </div>
+  <div class="tbl-wrap"><table class="tbl">
+    <tr><th>Step</th><th>Change</th><th>Lines in views.py</th></tr>
+    <tr><td>1</td><td>Extract PDF helpers → <code>invoices/pdf.py</code></td><td>600 → 520</td></tr>
+    <tr><td>2</td><td>Extract query building → <code>invoices/selectors.py</code></td><td>520 → 430</td></tr>
+    <tr><td>3</td><td>Move form handling into <code>invoices/forms.py</code></td><td>430 → 340</td></tr>
+    <tr><td>4</td><td>Split into <code>invoices/views/</code> package (<code>list.py</code>, <code>detail.py</code>, <code>actions.py</code>) with <code>__init__.py</code> re-exports so <code>urls.py</code> is unchanged</td><td>340 → 3 files under 130</td></tr>
+    <tr><td>5</td><td>Remove dead code that coverage shows is never hit, only after Marco confirms</td><td>−40</td></tr>
+  </table></div>
+  <div data-tabs>
+    <div class="tabs"><button class="tab-btn on" data-tab="cli">CLI worktree commands</button><button class="tab-btn" data-tab="vsc">VS Code Agents window</button></div>
+    <div class="tab-pane on" data-pane="cli"><p class="body">Instead of <code>git worktree add</code>, the CLI can create one for you: <code>/new worktree</code> starts a new session in a fresh worktree, and <code>/worktree</code> moves work into one. The <code>worktreeBaseRef</code> setting chooses whether it starts from <code>head</code> or the default branch.</p></div>
+    <div class="tab-pane" data-pane="vsc"><p class="body">In the VS Code <strong>Agents window</strong>, pick <strong>New Worktree</strong> in the isolation dropdown instead of <strong>Branch</strong>. Worktree sessions there always run with the Allow all permission level, so prefer them for well-tested, low-risk tasks like this one.</p></div>
+  </div>
+  <div class="callout warn"><div class="icon">⚠️</div><p>Worktrees isolate <em>files</em>, not your machine. The agent in <code>../ledgerly-views-refactor</code> can still reach your network, database and credentials. See <a href="Copilot_Sim_Security.html">Security, Sandboxing, Git Worktrees</a>.</p></div>
+</section>
+
+<!-- 7 -->
+<section class="step-panel" data-section="Change" data-title="Outdated dependencies" data-sub="Django 3.2 upgrade notes">
+  <div class="step-header"><div class="phase-tag amber">📦 Upgrade</div><h2>Ask for upgrade notes grounded in this repo</h2><p>Django 3.2 no longer gets security fixes. Before planning the move to 4.2, Marco wants a list of what will break here, not a generic upgrade guide.</p></div>
+  <div class="terminal typer">
+    <div class="terminal-header"><div class="terminal-dots"><div class="dot dot-r"></div><div class="dot dot-y"></div><div class="dot dot-g"></div></div><div class="terminal-title">bash — ledgerly</div><button class="run-btn">▶ Run</button></div>
+    <div class="terminal-body">
+<span class="l t-comment"># 1. Let the code tell you what is deprecated</span>
+<span class="l"><span class="t-prompt">$</span> <span class="t-cmd">python -Wd manage.py test --settings=ledgerly.settings.test 2&gt;&amp;1 | grep RemovedInDjango | sort -u</span></span>
+<span class="l t-warn" data-wait="900">invoices/urls.py:3: RemovedInDjango40Warning: django.conf.urls.url() is deprecated in favor of django.urls.re_path().</span>
+<span class="l t-warn">customers/utils.py:8: RemovedInDjango40Warning: force_text() is deprecated in favor of force_str().</span>
+<span class="l t-warn">billing/forms.py:2: RemovedInDjango40Warning: django.utils.translation.ugettext_lazy() is deprecated in favor of django.utils.translation.gettext_lazy().</span>
+<span class="l t-warn">payments/__init__.py: RemovedInDjango41Warning: 'payments' defines default_app_config ...</span>
+<span class="l"> </span>
+<span class="l t-comment"># 2. Ask Copilot to turn that into a plan</span>
+<span class="l"><span class="t-prompt">$</span> <span class="t-cmd">copilot --deny-tool=write</span></span>
+<span class="l"><span class="t-prompt">&gt;</span> <span class="t-cmd">/research Upgrading this repo from Django 3.2 to 4.2: use the warnings above, @requirements.txt</span></span>
+<span class="l"><span class="t-cmd">  and the code. Group findings by app, estimate effort, and flag every third-party package whose</span></span>
+<span class="l"><span class="t-cmd">  Django 4.2 support you could not confirm. Link the official release notes for each claim.</span></span>
+<span class="l t-success" data-wait="1200">✓ Report ready: 14 code changes in 9 files, 3 packages to check, 1 settings change</span>
+    </div>
+  </div>
+  <div class="doc"><div class="doc-bar">docs/upgrade-django-4.2.md (excerpt)<span class="state">reviewed by Marco</span></div>
+<div class="doc-body"><span class="md-h">## Must change before 4.0</span>
+- <span class="md-s">`url()`</span> → <span class="md-s">`re_path()`</span> or <span class="md-s">`path()`</span>: 6 urls.py files
+- <span class="md-s">`force_text`</span> → <span class="md-s">`force_str`</span>, <span class="md-s">`ugettext*`</span> → <span class="md-s">`gettext*`</span>: 5 files
+<span class="md-h">## Must change before 4.1</span>
+- Remove <span class="md-s">`default_app_config`</span> from 3 apps (AppConfig is discovered automatically)
+<span class="md-h">## Settings</span>
+- Set <span class="md-s">`DEFAULT_AUTO_FIELD`</span> explicitly to avoid new migrations for every model
+<span class="md-h">## Check manually (Copilot could not confirm)</span>
+- Celery, django-filter, and the PSP SDK: confirm Django 4.2 support in each project's own changelog
+<span class="md-h">## Suggested order</span>
+1. Fix deprecations on 3.2 (tests green) · 2. Bump to 4.0 · 3. 4.1 · 4. 4.2 · one PR each</div></div>
+  <div class="callout warn"><div class="icon">⚠️</div><p>Models are trained up to a cut-off date and can be wrong about library versions. Use real signals (deprecation warnings, failing tests) as the source of truth and check claims against the <a href="https://docs.djangoproject.com/en/stable/releases/">official Django release notes</a>. Never let an agent bump every dependency in one go.</p></div>
+</section>
+
+<!-- 8 -->
+<section class="step-panel" data-section="Ship" data-title="Review & PR" data-sub="Small PRs, human sign-off">
+  <div class="step-header"><div class="phase-tag green">✅ Review</div><h2>Four small PRs instead of one huge one</h2><p>Each PR has one purpose, so Marco can review it in one sitting and revert it on its own.</p></div>
+  <div class="tbl-wrap"><table class="tbl">
+    <tr><th>PR</th><th>Contents</th><th>Reviewers</th></tr>
+    <tr><td>#420</td><td><code>AGENTS.md</code> + characterization tests (no production code)</td><td>Marco</td></tr>
+    <tr><td>#421</td><td>CSV export: form, view, URL, tests</td><td>Marco, Sam</td></tr>
+    <tr><td>#422</td><td>views.py refactor, 5 commits, one per step</td><td>Marco</td></tr>
+    <tr><td>#423</td><td>Django deprecation fixes on 3.2 + upgrade notes</td><td>Marco</td></tr>
+  </table></div>
+  <div class="terminal">
+    <div class="terminal-header"><div class="terminal-dots"><div class="dot dot-r"></div><div class="dot dot-y"></div><div class="dot dot-g"></div></div><div class="terminal-title">bash — ledgerly-views-refactor</div></div>
+    <div class="terminal-body">
+<span class="l"><span class="t-prompt">&gt;</span> <span class="t-cmd">/review</span>   <span class="t-comment"># code-review agent; reads, does not modify code</span></span>
+<span class="l t-info">  No behaviour changes detected. invoices/views/__init__.py re-exports all 14 names used in urls.py.</span>
+<span class="l t-info">  Suggestion: invoices/selectors.py list_invoices has no docstring explaining the staff/cancelled order.</span>
+<span class="l"><span class="t-prompt">&gt;</span> <span class="t-cmd">/pr create</span>   <span class="t-comment"># draft title and body; Priya edits before submitting</span></span>
+    </div>
+  </div>
+  <h3 class="subsection">Brownfield review checklist</h3>
+  <ul class="check-list">
+    <li class="ok"><span class="ci">✓</span><div>Characterization tests are unchanged in refactor PRs. If one changed, behaviour changed.</div></li>
+    <li class="ok"><span class="ci">✓</span><div>Diff stays inside the files the plan named; no drive-by edits.</div></li>
+    <li class="ok"><span class="ci">✓</span><div>No edits to migrations already on main; no new dependencies.</div></li>
+    <li class="ok"><span class="ci">✓</span><div>Callers checked: views, Celery tasks, templates, management commands, signals.</div></li>
+    <li class="ok"><span class="ci">✓</span><div>Coverage did not drop for the touched app.</div></li>
+    <li class="ok"><span class="ci">✓</span><div>Copilot code review comments answered: fixed or explained.</div></li>
+  </ul>
+  <div class="callout info"><div class="icon">ℹ️</div><p>On github.com, you can also request <strong>Copilot</strong> as a reviewer on each PR. Its findings are a second pair of eyes, not an approval. How it uses repository instructions and auto-review options depend on settings this guide has not verified; check the official code review docs.</p></div>
+</section>
+
+<!-- 9 -->
+<section class="step-panel" data-section="Wrap-up" data-title="Prompt patterns" data-sub="Reusable brownfield prompts">
+  <div class="step-header"><div class="phase-tag teal">🧰 Patterns</div><h2>Brownfield prompt patterns</h2><p>The prompts that worked on Ledgerly, generalised. Copy them into your own chats or turn the best ones into a skill.</p></div>
+  <div class="tbl-wrap"><table class="tbl">
+    <tr><th>Pattern</th><th>Prompt shape</th><th>Use when</th></tr>
+    <tr><td><strong>Explain with sources</strong></td><td>"Explain how X works. Cite a file path for every claim. Say 'not sure' rather than guess."</td><td>Onboarding, before any change</td></tr>
+    <tr><td><strong>Trace a path</strong></td><td>"Show the call path from URL/task Y to Z, one hop per line."</td><td>Debugging, impact analysis</td></tr>
+    <tr><td><strong>Pin behaviour</strong></td><td>"Write characterization tests for X. Capture current behaviour, including bugs. Don't change production code; list surprises."</td><td>Before refactors and risky edits</td></tr>
+    <tr><td><strong>Smallest change</strong></td><td>"What's the smallest change to do Y? List files and why, then stop."</td><td>Any new feature</td></tr>
+    <tr><td><strong>Follow the local pattern</strong></td><td>"Implement Y the same way as @reports/views.py monthly_summary."</td><td>Keeping style consistent</td></tr>
+    <tr><td><strong>One refactor step</strong></td><td>"Step N only: move A to B. No behaviour change, no renames. Run tests, then stop."</td><td>Large-file refactors</td></tr>
+    <tr><td><strong>Blast radius</strong></td><td>"Find every caller of X: views, tasks, templates, signals, management commands."</td><td>Before changing a signature</td></tr>
+    <tr><td><strong>Second opinion</strong></td><td>CLI <code>/rubber-duck</code> on the plan, or <code>/security-review</code> on the diff</td><td>Risky or security-relevant changes</td></tr>
+    <tr><td><strong>Grounded research</strong></td><td>CLI <code>/research</code> with real warnings and <code>@requirements.txt</code>; ask for links</td><td>Upgrades, unfamiliar libraries</td></tr>
+  </table></div>
+  <div class="callout tip"><div class="icon">💡</div><p>The two most useful phrases for legacy code: <strong>"then stop"</strong> (keeps each turn reviewable) and <strong>"no behaviour change"</strong> (makes the goal testable). See the <a href="Copilot_Onboarding_Kit.html">Onboarding Kit</a> for a printable prompt cheat-sheet.</p></div>
+</section>
+
+<!-- 10 -->
+<section class="step-panel" data-section="Wrap-up" data-title="Anti-patterns" data-sub="What goes wrong in legacy code">
+  <div class="step-header"><div class="phase-tag coral">🚫 Anti-patterns</div><h2>How brownfield work with an agent goes wrong</h2><p>Each of these happened to someone at Northwind at least once.</p></div>
+  <div class="tbl-wrap"><table class="tbl">
+    <tr><th>Anti-pattern</th><th>What happens</th><th>Instead</th></tr>
+    <tr><td>"Clean up invoices/views.py"</td><td>A 600-line rewrite nobody can review; subtle behaviour changes ship.</td><td>Numbered steps, "step N only", tests and a commit after each.</td></tr>
+    <tr><td>Refactoring before characterization tests</td><td>30% coverage means most breakage is invisible.</td><td>Pin behaviour first; check coverage of the file you touch.</td></tr>
+    <tr><td>Letting the agent fix bugs it discovers</td><td>A "bug" may be a contract term; Finance numbers change silently.</td><td>Log an issue, keep the test, change behaviour in its own PR.</td></tr>
+    <tr><td>Trusting the architecture tour</td><td>Wrong paths and invented modules end up in docs.</td><td>Open every cited file; mark guesses "(verify)".</td></tr>
+    <tr><td>"Upgrade everything to latest"</td><td>Many breaking changes at once; impossible to bisect.</td><td>Fix deprecations first, then one framework version per PR.</td></tr>
+    <tr><td>Agent in the main checkout while you work</td><td>You and the agent edit the same files.</td><td>Use a git worktree for longer agent tasks.</td></tr>
+    <tr><td>Rules only in people's heads</td><td>Every new chat repeats the same mistakes.</td><td>Keep <code>AGENTS.md</code> current; add each repeated correction.</td></tr>
+  </table></div>
+  <div class="callout success"><div class="icon">✓</div><p>Result after two weeks: <code>invoices/views.py</code> coverage 9% → 63%, CSV export live, <code>views.py</code> split into three files under 130 lines, and Leo shipped his first PR on day three.</p></div>
+</section>
+
+<!-- 11 -->
+<section class="step-panel" data-section="Wrap-up" data-title="Where to go next" data-sub="Related guides">
+  <div class="step-header"><div class="phase-tag green">➡️ Next</div><h2>Where to go next</h2><p>Ledgerly is safer to change than it was. Keep going with the guide that fits.</p></div>
+  <div class="cards">
+    <div class="card blue"><h4>🌱 <a href="Copilot_Sim_Greenfield.html">Greenfield</a></h4><p>The same team builds ShipTrack from an empty repo with instructions, plans and CI.</p></div>
+    <div class="card purple"><h4>🧠 <a href="Copilot_Sim_Knowledge.html">Knowledge &amp; learning loop</a></h4><p>Keep <code>AGENTS.md</code>, instructions and Copilot Memory improving over time.</p></div>
+    <div class="card coral"><h4>🛡️ <a href="Copilot_Sim_Security.html">Security &amp; worktrees</a></h4><p>Approvals, sandboxing, content exclusion and safe parallel agents.</p></div>
+    <div class="card teal"><h4>🧩 <a href="Copilot_Sim_Customize.html">Skills, Agents, Tools, Hooks, MCP</a></h4><p>Turn the characterization-test prompt into a reusable skill.</p></div>
+    <div class="card amber"><h4>⚖️ <a href="Copilot_VSCode_vs_CLI.html">VS Code vs CLI</a></h4><p>When Leo's Ask chat or Marco's terminal session is the better fit.</p></div>
+    <div class="card green"><h4>❓ <a href="Copilot_FAQ.html">FAQ</a></h4><p>Short answers on cost, data handling and day-to-day use.</p></div>
+  </div>
+  <p class="body">Official docs: <a href="https://code.visualstudio.com/docs/agent-customization/custom-instructions">Custom instructions</a> · <a href="https://code.visualstudio.com/docs/agents/run/agents-window">VS Code Agents window</a> · <a href="https://docs.github.com/en/copilot/reference/copilot-cli-reference/cli-command-reference">Copilot CLI command reference</a> · <a href="https://docs.github.com/en/copilot/how-tos/copilot-cli/use-copilot-cli/allowing-tools">Allowing tools in the CLI</a>.</p>
+</section>
+
+    </div>
+  </main>
+</div>
+<script src="assets/copilot-sim.js?v=1"></script>
+<script src="assets/copilot-kit.js?v=1"></script>
+</body>
+</html>

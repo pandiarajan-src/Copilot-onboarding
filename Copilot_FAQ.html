@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>FAQ · GitHub Copilot Onboarding Hub</title>
+<meta name="description" content="Straight answers about GitHub Copilot in VS Code and the Copilot CLI: getting started, plans and AI Credits, agents, customization, security, CLI usage and troubleshooting.">
+<link rel="stylesheet" href="assets/copilot-sim.css?v=1">
+<link rel="stylesheet" href="assets/copilot-kit.css?v=1">
+</head>
+<body>
+<header class="sim-header">
+  <div class="icon">❓</div>
+  <div>
+    <h1>10 · Frequently asked questions</h1>
+    <p>Short, accurate answers for developers using GitHub Copilot in VS Code and the Copilot CLI, with links to the guide that goes deeper.</p>
+    <div class="stack-pills"><span class="pill">Updated November 2026</span><span class="pill">VS Code · Copilot Chat &amp; agents</span><span class="pill">GitHub Copilot CLI</span><span class="pill">Reference</span></div>
+  </div>
+  <a class="home-link" href="index.html">⌂ All guides</a>
+</header>
+<div class="wrap">
+  <div class="callout info"><div class="icon">ℹ️</div><p>Copilot changes quickly. These answers reflect the official docs as of November 2026. When something on screen differs, the <a href="https://docs.github.com/en/copilot">GitHub Copilot docs</a> and <a href="https://code.visualstudio.com/docs/agents/overview">VS Code agents docs</a> win.</p></div>
+
+  <h2 class="sec">Getting started</h2>
+  <div class="faq">
+    <details><summary>What exactly is GitHub Copilot?</summary><div><p>An AI assistant that works across your editor, terminal and GitHub: inline suggestions, next edit suggestions, chat, agents that edit files and run tools, code review, and the Copilot CLI. It sends your prompt plus gathered context (open files, instructions, tool results) to a model and returns suggestions, edits or tool calls.</p><p>Start with the <a href="Copilot_Intro.html">Introduction</a> and the <a href="Copilot_Feature_Tour.html">Feature Tour</a>.</p></div></details>
+    <details><summary>Do I need a paid plan to try it?</summary><div><p>No. When you sign in from VS Code without a plan you are enrolled in <strong>Copilot Free</strong>, which has Auto model selection only, limited agent use and 2,000 completions a month. All plans include the Copilot CLI. The cloud agent needs a paid plan.</p></div></details>
+    <details><summary>How do I set up Copilot in VS Code?</summary><div><p>Install VS Code, click the Copilot icon in the status bar, choose <strong>Use AI Features</strong> and sign in with GitHub. You can also run <strong>GitHub Copilot: Sign in</strong> from the Command Palette. Steps are identical on Windows, macOS and Linux. See <a href="Copilot_Sim_Setup.html">Setup</a>.</p></div></details>
+    <details><summary>How do I install the Copilot CLI?</summary><div><p>Pick one:</p><ul class="body"><li><code>npm install -g @github/copilot</code> (Node.js 22 or later)</li><li><code>winget install GitHub.Copilot</code> on Windows (PowerShell 6+ required)</li><li><code>brew install --cask copilot-cli</code> on macOS</li><li><code>curl -fsSL https://gh.io/copilot-install | bash</code> on macOS or Linux</li></ul><p>Then run <code>copilot</code>, type <code>/login</code>, and confirm with <code>copilot version</code>. Details in <a href="Copilot_Sim_Setup.html">Setup</a>.</p></div></details>
+    <details><summary>Should I start with VS Code or the CLI?</summary><div><p>Start where you already work. VS Code is best for visual diffs and inline suggestions; the CLI is best for terminals, SSH and CI. Both share the same account and repo customizations. Compare them in <a href="Copilot_VSCode_vs_CLI.html">VS Code agents vs CLI</a>.</p></div></details>
+  </div>
+
+  <h2 class="sec">Plans &amp; billing</h2>
+  <div class="faq">
+    <details><summary>What are GitHub AI Credits? Where did premium requests go?</summary><div><p>Copilot billing is now usage-based and measured in <strong>GitHub AI Credits</strong>. "Premium requests" was the earlier model; you may still see the old term in older docs and READMEs. Higher-cost models consume more credits per request.</p></div></details>
+    <details><summary>Which plans exist and what do they include?</summary><div><p>As listed on the plans page in November 2026 (check it before you buy):</p><div class="tbl-wrap"><table class="tbl"><tr><th>Plan</th><th>Price</th><th>AI Credits / month</th></tr><tr><td>Free</td><td>$0</td><td>Auto model only, 2,000 completions</td></tr><tr><td>Pro</td><td>$10</td><td>1,500</td></tr><tr><td>Pro+</td><td>$39</td><td>7,000</td></tr><tr><td>Max <span class="badge-new">new</span></td><td>$100</td><td>20,000</td></tr><tr><td>Business</td><td>$19 / seat</td><td>1,900</td></tr><tr><td>Enterprise</td><td>$39 / seat</td><td>3,900</td></tr></table></div><p>Students get Copilot free through GitHub Education. Source: <a href="https://docs.github.com/en/copilot/get-started/plans">Copilot plans</a>.</p></div></details>
+    <details><summary>How do I see or cap my usage from the CLI?</summary><div><p>Run <code>/usage</code> in a session. Set a ceiling with <code>/limits set max-ai-credits</code>, or pass <code>--max-ai-credits</code> on the command line, which is useful for <code>-p</code> runs in CI.</p></div></details>
+    <details><summary>Can I use Copilot with GitHub Enterprise Server?</summary><div><p>Copilot is not available on GitHub Enterprise Server. GHE.com accounts are supported: choose <strong>Continue with GHE.com</strong> when signing in to VS Code, or <code>copilot login --host URL</code> in the CLI.</p></div></details>
+  </div>
+
+  <h2 class="sec">Using Copilot</h2>
+  <div class="faq">
+    <details><summary>What is the difference between Ask, Plan and Agent in VS Code?</summary><div><p><strong>Ask</strong> answers questions and does not edit. <strong>Plan</strong> (start with <code>/plan</code>) produces a plan for you to approve first. <strong>Agent</strong> edits files, runs commands and calls tools in a loop. See the <a href="Copilot_Feature_Tour.html">Feature Tour</a>.</p></div></details>
+    <details><summary>Is Autopilot an agent?</summary><div><p>No. Autopilot is a permission and continuation mode: it auto-approves tool calls and keeps working without stopping for you. In the CLI it is one of three modes (standard, plan, autopilot) that you cycle with <kbd>Shift</kbd>+<kbd>Tab</kbd>. Use it only where mistakes are cheap to undo.</p></div></details>
+    <details><summary>What is a harness, and why is "Local" deprecated?</summary><div><p>The Session Target dropdown in VS Code picks which agent harness runs your session: <strong>Copilot</strong> (default), Claude, Codex or Local. The Local harness is deprecated and scheduled for removal by February 2027. Prompt files, <code>handoffs</code> and the <code>.vscode/mcp.json</code> format only work there, so migrate them. Details in <a href="Copilot_VSCode_vs_CLI.html#step-2">VS Code agents vs CLI, step 2</a>.</p></div></details>
+    <details><summary>How do I choose a model?</summary><div><p>In VS Code, use the model picker in Chat. In the CLI, use <code>/model</code>, the <code>--model</code> flag or the <code>COPILOT_MODEL</code> environment variable. Choose <code>auto</code> to let Copilot pick. The available model list changes often, so check the picker rather than a fixed list.</p></div></details>
+    <details><summary>Can I run several agent tasks in parallel?</summary><div><p>Yes. In VS Code, use the <strong>Agents window</strong> and pick <strong>New Worktree</strong> for each session. In the CLI, use <code>/new worktree</code>, <code>/fork</code>, background tasks (<kbd>Ctrl</kbd>+<kbd>X</kbd> then <kbd>b</kbd>) or <code>/fleet</code>. Give each session its own worktree so they do not edit the same files. See <a href="Copilot_Sim_Security.html">Security, Sandboxing, Git Worktrees</a>.</p></div></details>
+    <details><summary>How do I hand a task to the cloud agent?</summary><div><p>From the CLI, run <code>/delegate</code> with a scoped prompt. In VS Code, choose the cloud session target. The cloud agent works in an ephemeral Linux environment and delivers a pull request. It needs a paid plan.</p></div></details>
+  </div>
+
+  <h2 class="sec">Customization</h2>
+  <div class="faq">
+    <details><summary>Where do repo-wide instructions go?</summary><div><p>In <code>.github/copilot-instructions.md</code>. For rules that apply to some paths only, use <code>.github/instructions/NAME.instructions.md</code> with an <code>applyTo</code> glob in the frontmatter. Generate a starter file with <code>/init</code> in the CLI. Note that instructions do not affect inline suggestions. See <a href="Copilot_Sim_Knowledge.html">Knowledge &amp; learning loop</a>.</p></div></details>
+    <details><summary>AGENTS.md or copilot-instructions.md?</summary><div><p>Both work in VS Code and the CLI. <code>AGENTS.md</code> is a cross-tool convention and can be nested in subfolders; the CLI also supports <code>@path</code> imports inside it. A common pattern is project facts (build, test, layout) in <code>AGENTS.md</code> and Copilot-specific style rules in <code>copilot-instructions.md</code>.</p></div></details>
+    <details><summary>Should I still write prompt files?</summary><div><p>No. <code>.github/prompts/*.prompt.md</code> only runs on the deprecated Local harness in VS Code. Use agent skills instead: <code>.github/skills/NAME/SKILL.md</code> with <code>name</code> and <code>description</code> frontmatter. Skills appear as <code>/NAME</code> in both VS Code and the CLI. See <a href="Copilot_Sim_Customize.html">Skills, Agents, Tools, Hooks, MCP</a>.</p></div></details>
+    <details><summary>When do I use a skill and when a custom agent?</summary><div><p>A <strong>skill</strong> packages a repeatable task (for example "add an endpoint") that any agent can run or that the model loads when relevant. A <strong>custom agent</strong> (<code>.github/agents/NAME.agent.md</code>) is a persona with its own tools, model and instructions, such as a read-only API reviewer. Pick it in the VS Code agent picker, or with <code>/agent</code> or <code>--agent</code> in the CLI.</p></div></details>
+    <details><summary>My MCP server works in VS Code but not in the CLI. Why?</summary><div><p>Usually the file format. The CLI reads <code>.mcp.json</code> or <code>.github/mcp.json</code> with a top-level <code>mcpServers</code> key, plus <code>~/.copilot/mcp-config.json</code>. It ignores <code>.vscode/mcp.json</code>, which uses <code>servers</code>. Also check that the folder is trusted. Migrate with <code>jq '{mcpServers: .servers}' .vscode/mcp.json &gt; .mcp.json</code>. Walkthrough in <a href="Copilot_VSCode_vs_CLI.html#step-5">VS Code agents vs CLI, step 5</a>.</p></div></details>
+    <details><summary>Do hooks work the same in VS Code and the CLI?</summary><div><p>Yes. The VS Code Copilot harness, the CLI and the cloud agent share one format: JSON files in <code>.github/hooks/</code> with events such as <code>preToolUse</code>. A <code>preToolUse</code> hook can return <code>allow</code>, <code>deny</code> or <code>ask</code>. The cloud agent only reads <code>.github/hooks/*.json</code> and runs bash. See the <a href="https://docs.github.com/en/copilot/reference/hooks-reference">hooks reference</a>.</p></div></details>
+  </div>
+
+  <h2 class="sec">Security &amp; privacy</h2>
+  <div class="faq">
+    <details><summary>Will an agent run commands without asking me?</summary><div><p>Not by default. VS Code starts at the <strong>Manual</strong> permission level. The CLI auto-allows read-only operations but prompts for writes, destructive shell commands and URLs. Autopilot, Allow all, <code>--allow-all</code> and <code>/yolo</code> remove those prompts. See <a href="Copilot_Sim_Security.html">Security</a>.</p></div></details>
+    <details><summary>Is <code>--allow-all</code> (or <code>/yolo</code>) safe?</summary><div><p>Only in a disposable environment. With all prompts removed, a shell command can do anything your user account can: push, delete files or reach the network. Prefer targeted rules such as <code>--allow-tool='shell(git:*)' --deny-tool='shell(git push)'</code>. Deny rules always win over allow rules.</p></div></details>
+    <details><summary>Does turning on the VS Code agent sandbox block network access?</summary><div><p>No. With <code>chat.agent.sandbox.enabled</code> on, general network access is still allowed by default; local network access is not. Restrict domains with the sandbox network settings. The sandbox runs on macOS 15+ and Linux/WSL2; Windows 11 support is <span class="badge-new">experimental</span>.</p></div></details>
+    <details><summary>Is content exclusion a security boundary?</summary><div><p>No. Admins can configure content exclusion to keep files out of Copilot context, but it is not applied to symlinks or remote file systems, may miss indirect access, and is not guaranteed for third-party MCP servers. Keep real secrets out of the repository.</p></div></details>
+    <details><summary>How do I keep secrets out of prompts and logs?</summary><div><p>Never paste secrets into chat. In the CLI, <code>--secret-env-vars VAR</code> redacts named environment variables. Treat MCP servers, web pages and files as possible prompt-injection sources and keep approvals on. For data handling and retention, see the <a href="https://copilot.github.trust.page">GitHub Copilot Trust Center</a>.</p></div></details>
+  </div>
+
+  <h2 class="sec">CLI</h2>
+  <div class="faq">
+    <details><summary>How do I run the CLI in a script or CI job?</summary><div><p>Use <code>copilot -p "PROMPT"</code>; it exits when done. Add <code>-s</code> for response-only output or <code>--output-format=json</code> for JSON Lines. Authenticate with <code>COPILOT_GITHUB_TOKEN</code> set to a fine-grained PAT that has the <strong>Copilot Requests</strong> permission. Classic <code>ghp_</code> tokens are not supported. Example in <a href="Copilot_VSCode_vs_CLI.html#step-7">VS Code agents vs CLI, step 7</a>.</p></div></details>
+    <details><summary>Why are my repo hooks and MCP servers ignored with <code>-p</code>?</summary><div><p>In programmatic mode they load only when you opt in with <code>GITHUB_COPILOT_PROMPT_MODE_REPO_HOOKS=true</code> or <code>GITHUB_COPILOT_PROMPT_MODE_WORKSPACE_MCP=true</code>. The folder must also be trusted; <code>--trust-folder</code> trusts it for that single run.</p></div></details>
+    <details><summary>Where does the CLI keep its settings?</summary><div><p>In <code>~/.copilot/</code> (change it with <code>COPILOT_HOME</code>). User settings live in <code>settings.json</code>; <code>config.json</code> is internal state such as auth and trusted folders. Repo-level settings go in <code>.github/copilot/settings.json</code>. Open settings with <code>/settings</code> or set a key with <code>copilot config KEY VALUE</code>.</p></div></details>
+    <details><summary>How do I undo what the agent just did?</summary><div><p>Use <code>/undo</code> (alias <code>/rewind</code>). <code>/session checkpoints</code> lists restore points. Committing before large runs keeps Git as a second safety net.</p></div></details>
+  </div>
+
+  <h2 class="sec">Troubleshooting</h2>
+  <div class="faq">
+    <details><summary><code>npm install -g @github/copilot</code> fails. What should I check?</summary><div><p>Confirm Node.js 22 or later with <code>node --version</code>. If your <code>~/.npmrc</code> sets <code>ignore-scripts=true</code>, install with <code>npm_config_ignore_scripts=false npm install -g @github/copilot</code>. On Windows, use PowerShell 6 or later, or install with WinGet instead.</p></div></details>
+    <details><summary>The Homebrew command in the README does not match the docs.</summary><div><p>The sources disagree. The official docs use <code>brew install --cask copilot-cli</code>; the README shows <code>brew install copilot-cli</code>. Follow the docs, and try the other form only if the cask is not found.</p></div></details>
+    <details><summary>Copilot is ignoring my instructions.</summary><div><p>Check what is actually loaded: <code>/env</code> or <code>copilot instruction list</code> in the CLI, and <strong>Chat: Open Customizations</strong> in VS Code. Confirm the file path and the <code>applyTo</code> glob. CLI subagents only get repo instructions when the agent sets <code>include-custom-instructions: true</code>. Instructions never affect inline suggestions.</p></div></details>
+    <details><summary>Sign-in works, but my company account is not used in VS Code.</summary><div><p>For GHE.com, choose <strong>Continue with GHE.com</strong>, or set <code>github.copilot.advanced</code> to <code>{"authProvider":"github-enterprise"}</code>. To use a different account per workspace, open Accounts → <strong>Manage Extension Account Preferences</strong> → GitHub Copilot Chat.</p></div></details>
+    <details><summary>The agent gave a confident but wrong answer.</summary><div><p>Models can be wrong. Review every change, run the tests, and correct the source: add the missing fact to <code>AGENTS.md</code> or an instructions file so the next session gets it right. Send feedback from the CLI with <code>/feedback</code>. See <a href="Copilot_Sim_Knowledge.html">Knowledge &amp; learning loop</a> and the review checklist in the <a href="Copilot_Onboarding_Kit.html">Onboarding Kit</a>.</p></div></details>
+  </div>
+
+  <h2 class="sec">Keep learning</h2>
+  <div class="grid">
+    <a class="tile" href="Copilot_Training.html"><div class="em">🎓</div><h3>Training path</h3><p>Modules with hands-on labs and a knowledge check.</p></a>
+    <a class="tile" href="Copilot_Onboarding_Kit.html"><div class="em">🧰</div><h3>Onboarding Kit</h3><p>First-week checklist, prompt cheat-sheet and review checklist.</p></a>
+    <a class="tile" href="Copilot_VSCode_vs_CLI.html"><div class="em">⚖️</div><h3>VS Code agents vs CLI</h3><p>Side-by-side comparison and a "which one when?" chooser.</p></a>
+  </div>
+</div>
+<script src="assets/copilot-sim.js?v=1"></script>
+<script src="assets/copilot-kit.js?v=1"></script>
+</body>
+</html>

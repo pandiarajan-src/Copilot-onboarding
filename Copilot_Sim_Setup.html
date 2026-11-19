@@ -1,0 +1,400 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>3 · Setup: GitHub Copilot in VS Code and the Copilot CLI</title>
+<meta name="description" content="Step-by-step setup simulator: get a Copilot plan, install and sign in to GitHub Copilot in VS Code and the GitHub Copilot CLI on Windows, macOS and Linux, configure it, verify it and fix common problems.">
+<link rel="stylesheet" href="assets/copilot-sim.css?v=1">
+<link rel="stylesheet" href="assets/copilot-kit.css?v=1">
+</head>
+<body>
+<header class="sim-header">
+  <div class="icon">⚙️</div>
+  <div>
+    <h1>3 · Setup</h1>
+    <p>Get access, install and sign in to Copilot in VS Code and the Copilot CLI, then verify everything works before you write a line of ShipTrack.</p>
+    <div class="stack-pills"><span class="pill">Updated November 2026</span><span class="pill">VS Code · Copilot Chat</span><span class="pill">GitHub Copilot CLI</span><span class="pill">Windows · macOS · Linux</span><span class="pill">~30 minutes</span></div>
+  </div>
+  <a class="home-link" href="index.html">⌂ All guides</a>
+</header>
+<div class="sim-body">
+  <nav class="sidebar" id="steps-nav" aria-label="Steps"></nav>
+  <main class="main-area">
+    <div class="progress-bar-container">
+      <div class="progress-bar-outer"><div class="progress-bar-inner" id="progress"></div></div>
+      <div class="progress-label" id="progress-label">Step 1</div>
+    </div>
+    <div class="step-content-area">
+
+<!-- 1 -->
+<section class="step-panel" data-section="Access" data-title="Prerequisites" data-sub="Account, plan, policy">
+  <div class="step-header"><div class="phase-tag">✅ Checklist</div><h2>Before you install anything</h2><p>Leo joins Northwind Logistics on Monday. Before he touches ShipTrack, Marco checks three things: a GitHub account, a Copilot plan or seat, and the organisation's Copilot policies.</p></div>
+
+  <ul class="check-list">
+    <li class="ok"><span class="ci">✓</span><div><strong>A GitHub account.</strong> Personal accounts work for Free, Pro, Pro+ and Max. For Business or Enterprise, use the account your organisation added to the <code>northwind</code> org (or your GHE.com account, if your company uses data residency).</div></li>
+    <li class="ok"><span class="ci">✓</span><div><strong>A Copilot plan or seat.</strong> Without one, signing in to VS Code enrolls you in <strong>Copilot Free</strong>. Business and Enterprise seats are assigned by an organisation owner. All plans include the Copilot CLI.</div></li>
+    <li class="ok"><span class="ci">✓</span><div><strong>Organisation policy.</strong> On Business/Enterprise, owners decide which features are on: for example MCP servers, Copilot Memory and some agent features. If something in this guide is missing for you, a policy is the first thing to check.</div></li>
+    <li><span class="ci">○</span><div><strong>Git and a terminal</strong> you are comfortable with. On Windows the CLI needs <strong>PowerShell v6 or later</strong> (PowerShell 7 is fine; the built-in Windows PowerShell 5.1 is not).</div></li>
+  </ul>
+
+  <h3 class="subsection">Plans at a glance</h3>
+  <p class="body">Copilot now bills usage in <strong>GitHub AI Credits</strong>. Older docs and the CLI README still say "premium requests"; treat that as the previous name. Figures below are as read in November 2026: check the <a href="https://docs.github.com/en/copilot/get-started/plans">plans page</a> before you rely on them.</p>
+  <div class="tbl-wrap"><table class="tbl">
+    <tr><th>Plan</th><th>Price</th><th>Monthly AI Credits</th><th>Good for</th></tr>
+    <tr><td><strong>Free</strong></td><td>$0</td><td>Auto model only, limited agents, 2,000 completions</td><td>Trying Copilot</td></tr>
+    <tr><td><strong>Pro</strong></td><td>$10/mo</td><td>1,500 (1,000 base + 500 flex)</td><td>Individual developers</td></tr>
+    <tr><td><strong>Pro+</strong></td><td>$39/mo</td><td>7,000</td><td>Heavy agent users</td></tr>
+    <tr><td><strong>Max</strong> <span class="badge-new">new</span></td><td>$100/mo</td><td>20,000</td><td>Power users</td></tr>
+    <tr><td><strong>Business</strong></td><td>$19/seat</td><td>1,900</td><td>Teams (Northwind uses this)</td></tr>
+    <tr><td><strong>Enterprise</strong></td><td>$39/seat</td><td>3,900</td><td>Large organisations</td></tr>
+  </table></div>
+
+  <div class="callout warn"><div class="icon">⚠️</div><p><strong>GitHub Enterprise Server is not supported.</strong> Copilot works with github.com and GHE.com accounts. The cloud agent needs a paid plan.</p></div>
+</section>
+
+<!-- 2 -->
+<section class="step-panel" data-section="VS Code" data-title="Install VS Code + sign in" data-sub="Windows · macOS · Linux">
+  <div class="step-header"><div class="phase-tag green">📦 Install</div><h2>Install VS Code and sign in to Copilot</h2><p>Install the latest stable VS Code from <a href="https://code.visualstudio.com/">code.visualstudio.com</a>. The Copilot sign-in is the same on every OS; only the install differs.</p></div>
+
+  <div data-tabs>
+    <div class="tabs">
+      <button class="tab-btn on" data-tab="win">Windows</button>
+      <button class="tab-btn" data-tab="mac">macOS</button>
+      <button class="tab-btn" data-tab="linux">Linux</button>
+    </div>
+    <div class="tab-pane on" data-pane="win">
+      <ol class="body">
+        <li>Download the <strong>User Installer</strong> for Windows and run it. No admin rights needed.</li>
+        <li>Keep <strong>Add to PATH</strong> ticked so <code>code</code> works in your terminal.</li>
+        <li>Open a new PowerShell window and confirm: <code>code --version</code>.</li>
+      </ol>
+    </div>
+    <div class="tab-pane" data-pane="mac">
+      <ol class="body">
+        <li>Download the macOS build (Universal or Apple silicon) and move <strong>Visual Studio Code.app</strong> to <code>/Applications</code>.</li>
+        <li>In VS Code, run <strong>Shell Command: Install 'code' command in PATH</strong> from the Command Palette (<kbd>⇧⌘P</kbd>).</li>
+        <li>Open a new Terminal and confirm: <code>code --version</code>.</li>
+      </ol>
+    </div>
+    <div class="tab-pane" data-pane="linux">
+      <ol class="body">
+        <li>Download the <code>.deb</code> (Debian/Ubuntu) or <code>.rpm</code> (Fedora/RHEL) package and install it with your package manager, or use the distribution's packaged VS Code.</li>
+        <li>The package puts <code>code</code> on your PATH.</li>
+        <li>Confirm: <code>code --version</code>.</li>
+      </ol>
+    </div>
+  </div>
+
+  <h3 class="subsection">Sign in to Copilot (all platforms)</h3>
+  <div class="flow"><span class="node done">Copilot icon in the status bar</span><span class="arrow">→</span><span class="node done">Use AI Features</span><span class="arrow">→</span><span class="node on">Sign in with GitHub</span><span class="arrow">→</span><span class="node">Authorize in browser</span></div>
+  <ul class="body">
+    <li>Other ways in: the <strong>Accounts</strong> menu → <em>Sign in with GitHub to use GitHub Copilot</em>, or the command <strong>GitHub Copilot: Sign in</strong>.</li>
+    <li><strong>GHE.com account?</strong> Choose <em>Continue with GHE.com</em>, or set this in your user settings:</li>
+  </ul>
+  <div class="doc"><div class="doc-bar">settings.json (User)<span class="state">optional</span></div><div class="doc-body"><span class="md-k">"github.copilot.advanced"</span>: {
+  <span class="md-k">"authProvider"</span>: <span class="md-s">"github-enterprise"</span>
+}</div></div>
+  <div class="callout info"><div class="icon">ℹ️</div><p>Chat and agents come from the <strong>GitHub Copilot Chat</strong> extension (<code>GitHub.Copilot-Chat</code>). Whether it ships pre-installed in your build varies, so if the Copilot icon is missing, check the Extensions view. Always use the latest stable VS Code; no minimum version is published in the pages we checked.</p></div>
+</section>
+
+<!-- 3 -->
+<section class="step-panel" data-section="VS Code" data-title="Verify in VS Code" data-sub="First chat, right account">
+  <div class="step-header"><div class="phase-tag green">🔍 Verify</div><h2>Prove it works in VS Code</h2><p>Priya clones <code>northwind/shiptrack</code>, opens it in VS Code and runs a quick smoke test in the Chat view.</p></div>
+
+  <ol class="body">
+    <li>Open the <strong>Chat view</strong> from the Copilot icon in the title bar or status bar.</li>
+    <li>Pick the <strong>Ask</strong> agent (read-only) and leave the model on <strong>Auto</strong>.</li>
+    <li>Ask something about the open repo. You should get an answer that mentions real files.</li>
+    <li>Start typing in a Python file and check that an inline suggestion appears.</li>
+  </ol>
+
+  <div class="chat reveal"><div class="chat-header copilot">🤖 VS Code · Copilot Chat <span class="tag">Ask · shiptrack</span></div><div class="chat-body">
+    <div class="msg user"><div class="who">Priya</div><div class="bubble">What is in this repository so far, and how do I run the tests?</div></div>
+    <div class="msg ai"><div class="who">Copilot</div><div class="bubble">The repo is a fresh skeleton: <code>pyproject.toml</code> (Python 3.12, FastAPI, SQLAlchemy 2, pytest, ruff), an empty <code>app/</code> package and a CI workflow in <code>.github/workflows/ci.yml</code>. Run the tests with <code>pytest</code> from the repo root once dependencies are installed.</div></div>
+    <div class="msg user"><div class="who">Priya</div><div class="bubble">Thanks. Which account am I using?</div></div>
+    <div class="msg hook"><div class="who">Tip</div><div class="bubble">Copilot cannot answer that reliably. Check the <strong>Accounts</strong> menu in the activity bar instead: it shows the GitHub account VS Code uses for Copilot.</div></div>
+  </div></div>
+
+  <h3 class="subsection">If something looks wrong</h3>
+  <ul class="check-list">
+    <li class="ok"><span class="ci">✓</span><div><strong>Wrong account for this repo?</strong> Accounts → <em>Manage Extension Account Preferences</em> → <em>GitHub Copilot Chat</em> lets you pick an account per workspace.</div></li>
+    <li class="ok"><span class="ci">✓</span><div><strong>No chat at all?</strong> Make sure <code>chat.disableAIFeatures</code> is not set to <code>true</code> in user or workspace settings.</div></li>
+    <li class="ok"><span class="ci">✓</span><div><strong>Telemetry questions?</strong> <code>telemetry.telemetryLevel</code> controls VS Code telemetry. Data handling for Copilot is described in the <a href="https://copilot.github.trust.page">GitHub Copilot Trust Center</a>.</div></li>
+  </ul>
+</section>
+
+<!-- 4 -->
+<section class="step-panel" data-section="Copilot CLI" data-title="CLI prerequisites" data-sub="Node 22+, tokens">
+  <div class="step-header"><div class="phase-tag purple">✅ Checklist</div><h2>What the Copilot CLI needs</h2><p>Marco lives in the terminal, so he installs the Copilot CLI too. It is a separate program, <code>copilot</code>, with its own login.</p></div>
+
+  <ul class="check-list">
+    <li class="ok"><span class="ci">✓</span><div><strong>An active Copilot subscription</strong> (any plan, including Free).</div></li>
+    <li class="ok"><span class="ci">✓</span><div><strong>Node.js 22 or later</strong>, only if you install with npm. Check with <code>node --version</code>. WinGet, Homebrew and the install script do not need Node.</div></li>
+    <li class="ok"><span class="ci">✓</span><div><strong>Windows:</strong> PowerShell v6 or later.</div></li>
+  </ul>
+
+  <h3 class="subsection">Signing in: interactive vs token</h3>
+  <div class="tbl-wrap"><table class="tbl">
+    <tr><th>Method</th><th>When</th><th>Notes</th></tr>
+    <tr><td><strong>Web flow</strong></td><td>Your laptop</td><td>Default with <code>/login</code> or <code>copilot login</code>. Opens a browser.</td></tr>
+    <tr><td><strong>Device code</strong></td><td>SSH box, dev container, remote VM</td><td><code>copilot login --device-code</code>. Enter the code on another device.</td></tr>
+    <tr><td><strong>Fine-grained PAT</strong></td><td>CI and automation</td><td>User-owned token with the <strong>Copilot Requests</strong> account permission. Pass with <code>copilot login --with-token</code> or an environment variable.</td></tr>
+    <tr><td class="n"><strong>Classic PAT (<code>ghp_</code>)</strong></td><td class="n">Never</td><td class="n">Not supported.</td></tr>
+  </table></div>
+
+  <p class="body">When several token variables are set, the CLI uses the first it finds, in this order:</p>
+  <div class="flow"><span class="node on">COPILOT_GITHUB_TOKEN</span><span class="arrow">&gt;</span><span class="node">GH_TOKEN</span><span class="arrow">&gt;</span><span class="node">GITHUB_TOKEN</span></div>
+  <div class="callout warn"><div class="icon">⚠️</div><p>A stray <code>GH_TOKEN</code> or <code>GITHUB_TOKEN</code> in your shell profile (left over from the GitHub CLI or a script) can silently override your interactive login. If <code>copilot</code> signs in as the wrong identity, check these first.</p></div>
+</section>
+
+<!-- 5 -->
+<section class="step-panel" data-section="Copilot CLI" data-title="Install the CLI" data-sub="winget · Homebrew · npm · script">
+  <div class="step-header"><div class="phase-tag purple">📦 Install</div><h2>Install the Copilot CLI</h2><p>Pick one method per machine. Prefer your OS package manager; use npm if your team standardises on Node.</p></div>
+
+  <div data-tabs>
+    <div class="tabs">
+      <button class="tab-btn on" data-tab="win">Windows</button>
+      <button class="tab-btn" data-tab="mac">macOS</button>
+      <button class="tab-btn" data-tab="linux">Linux</button>
+    </div>
+    <div class="tab-pane on" data-pane="win">
+      <div class="terminal typer"><div class="terminal-header"><div class="terminal-dots"><div class="dot dot-r"></div><div class="dot dot-y"></div><div class="dot dot-g"></div></div><div class="terminal-title">PowerShell 7 — leo</div><button class="run-btn">▶ Run</button></div><div class="terminal-body">
+<span class="l t-comment"># Option A: WinGet (no Node needed)</span>
+<span class="l"><span class="t-prompt">PS&gt;</span> <span class="t-cmd">winget install GitHub.Copilot</span></span>
+<span class="l t-output" data-wait="700">Found GitHub Copilot CLI [GitHub.Copilot]</span>
+<span class="l t-success">Successfully installed</span>
+<span class="l"> </span>
+<span class="l t-comment"># Option B: npm (needs Node.js 22+)</span>
+<span class="l"><span class="t-prompt">PS&gt;</span> <span class="t-cmd">node --version</span></span>
+<span class="l t-output">v22.11.0</span>
+<span class="l"><span class="t-prompt">PS&gt;</span> <span class="t-cmd">npm install -g @github/copilot</span></span>
+<span class="l t-output" data-wait="700">added 1 package in 9s</span>
+<span class="l"> </span>
+<span class="l"><span class="t-prompt">PS&gt;</span> <span class="t-cmd">copilot version</span></span>
+<span class="l t-success">(prints the installed version)</span>
+</div></div>
+      <p class="body">Prerelease builds: <code>winget install GitHub.Copilot.Prerelease</code> or <code>npm install -g @github/copilot@prerelease</code>.</p>
+    </div>
+    <div class="tab-pane" data-pane="mac">
+      <div class="terminal typer"><div class="terminal-header"><div class="terminal-dots"><div class="dot dot-r"></div><div class="dot dot-y"></div><div class="dot dot-g"></div></div><div class="terminal-title">zsh — marco</div><button class="run-btn">▶ Run</button></div><div class="terminal-body">
+<span class="l t-comment"># Option A: Homebrew (variant shown in the GitHub Docs install page)</span>
+<span class="l"><span class="t-prompt">$</span> <span class="t-cmd">brew install --cask copilot-cli</span></span>
+<span class="l t-output" data-wait="700">==&gt; Installing Cask copilot-cli</span>
+<span class="l t-success">copilot-cli was successfully installed!</span>
+<span class="l"> </span>
+<span class="l t-comment"># Option B: install script</span>
+<span class="l"><span class="t-prompt">$</span> <span class="t-cmd">curl -fsSL https://gh.io/copilot-install | bash</span></span>
+<span class="l"> </span>
+<span class="l t-comment"># Option C: npm (needs Node.js 22+)</span>
+<span class="l"><span class="t-prompt">$</span> <span class="t-cmd">npm install -g @github/copilot</span></span>
+<span class="l"> </span>
+<span class="l"><span class="t-prompt">$</span> <span class="t-cmd">copilot version</span></span>
+<span class="l t-success">(prints the installed version)</span>
+</div></div>
+      <div class="callout warn"><div class="icon">⚠️</div><p><strong>Sources disagree on the Homebrew command.</strong> The GitHub Docs install page uses <code>brew install --cask copilot-cli</code> (prerelease: <code>copilot-cli@prerelease</code>); the <code>github/copilot-cli</code> README shows <code>brew install copilot-cli</code>. We follow the docs. If the cask is not found, check the <a href="https://docs.github.com/en/copilot/how-tos/copilot-cli/set-up-copilot-cli/install-copilot-cli">current install page</a>.</p></div>
+    </div>
+    <div class="tab-pane" data-pane="linux">
+      <div class="terminal typer"><div class="terminal-header"><div class="terminal-dots"><div class="dot dot-r"></div><div class="dot dot-y"></div><div class="dot dot-g"></div></div><div class="terminal-title">bash — priya</div><button class="run-btn">▶ Run</button></div><div class="terminal-body">
+<span class="l t-comment"># Option A: install script (also works with wget)</span>
+<span class="l"><span class="t-prompt">$</span> <span class="t-cmd">curl -fsSL https://gh.io/copilot-install | bash</span></span>
+<span class="l t-comment"># installs under $HOME/.local by default (/usr/local when run as root)</span>
+<span class="l t-comment"># override with PREFIX=... and pin with VERSION=...</span>
+<span class="l"> </span>
+<span class="l t-comment"># Option B: npm (needs Node.js 22+)</span>
+<span class="l"><span class="t-prompt">$</span> <span class="t-cmd">npm install -g @github/copilot</span></span>
+<span class="l"> </span>
+<span class="l"><span class="t-prompt">$</span> <span class="t-cmd">copilot version</span></span>
+<span class="l t-success">(prints the installed version)</span>
+</div></div>
+      <p class="body">If <code>copilot</code> is not found after the script, make sure the install location under <code>PREFIX</code> is on your <code>PATH</code> and open a new shell.</p>
+    </div>
+  </div>
+
+  <h3 class="subsection">npm blocked by <code>ignore-scripts</code>?</h3>
+  <p class="body">If your <code>~/.npmrc</code> sets <code>ignore-scripts=true</code>, the package's install step is skipped. Re-run with the override for this one install:</p>
+  <div class="terminal"><div class="terminal-header"><div class="terminal-dots"><div class="dot dot-r"></div><div class="dot dot-y"></div><div class="dot dot-g"></div></div><div class="terminal-title">bash</div></div><div class="terminal-body">
+<span class="l"><span class="t-prompt">$</span> <span class="t-cmd">npm_config_ignore_scripts=false npm install -g @github/copilot</span></span>
+</div></div>
+
+  <h3 class="subsection">Keeping it up to date</h3>
+  <ul class="body">
+    <li>Update now: <code>copilot update</code>, or <code>/update</code> inside a session (<code>/update stable</code> or <code>/update prerelease</code>).</li>
+    <li>Turn off auto-update: set <code>COPILOT_AUTO_UPDATE=false</code> or start with <code>--no-auto-update</code>. Useful when your team pins a version.</li>
+    <li>Other options: release binaries on GitHub Releases, and the container image <code>ghcr.io/github/copilot-cli</code> for headless SDK use.</li>
+  </ul>
+</section>
+
+<!-- 6 -->
+<section class="step-panel" data-section="Copilot CLI" data-title="First run" data-sub="Trust, login, first prompt">
+  <div class="step-header"><div class="phase-tag purple">⌨️ First run</div><h2>First run: trust the folder, sign in, ask something</h2><p>Priya starts the CLI inside the ShipTrack checkout. Press <strong>▶ Run</strong> to watch the session.</p></div>
+
+  <div class="terminal typer"><div class="terminal-header"><div class="terminal-dots"><div class="dot dot-r"></div><div class="dot dot-y"></div><div class="dot dot-g"></div></div><div class="terminal-title">bash — shiptrack</div><button class="run-btn">▶ Run</button></div><div class="terminal-body">
+<span class="l"><span class="t-prompt">priya@nw:~/code/shiptrack$</span> <span class="t-cmd">copilot</span></span>
+<span class="l t-info" data-wait="600">GitHub Copilot CLI</span>
+<span class="l t-warn">Do you trust the files in this folder?  ~/code/shiptrack</span>
+<span class="l t-output">  1. Yes, for this session</span>
+<span class="l t-output">  2. Yes, and remember this folder</span>
+<span class="l t-output">  3. No, exit</span>
+<span class="l"><span class="t-prompt">›</span> <span class="t-cmd">2</span></span>
+<span class="l"> </span>
+<span class="l"><span class="t-prompt">›</span> <span class="t-cmd">/login</span></span>
+<span class="l t-output">Choose an account: GitHub.com</span>
+<span class="l t-output" data-wait="900">Opening your browser to sign in...</span>
+<span class="l t-success">✓ Signed in as priya-northwind</span>
+<span class="l"> </span>
+<span class="l"><span class="t-prompt">›</span> <span class="t-cmd">/model</span></span>
+<span class="l t-output">Current model: auto  (pick a model, or keep auto)</span>
+<span class="l"> </span>
+<span class="l"><span class="t-prompt">›</span> <span class="t-cmd">Summarise this repo in three bullets</span></span>
+<span class="l t-output" data-wait="900">● Read pyproject.toml, .github/workflows/ci.yml</span>
+<span class="l t-output">  - Python 3.12 FastAPI service skeleton (app/ is empty)</span>
+<span class="l t-output">  - Tooling: pytest + httpx for tests, ruff for lint</span>
+<span class="l t-output">  - CI runs ruff and pytest on every push</span>
+<span class="l"> </span>
+<span class="l"><span class="t-prompt">›</span> <span class="t-cmd">/exit</span></span>
+</div></div>
+  <div class="callout info"><div class="icon">ℹ️</div><p>Prompts are paraphrased: exact wording changes between versions. What matters is the decision. <strong>Trusting a folder</strong> lets the CLI load that repo's hooks, <code>.mcp.json</code> and plugin settings. Only trust repos you would also run <code>make</code> in.</p></div>
+
+  <h3 class="subsection">On a remote box or in CI</h3>
+  <div class="terminal"><div class="terminal-header"><div class="terminal-dots"><div class="dot dot-r"></div><div class="dot dot-y"></div><div class="dot dot-g"></div></div><div class="terminal-title">bash — build-vm</div></div><div class="terminal-body">
+<span class="l t-comment"># no browser here: use the device code flow</span>
+<span class="l"><span class="t-prompt">$</span> <span class="t-cmd">copilot login --device-code</span></span>
+<span class="l"> </span>
+<span class="l t-comment"># CI: a fine-grained PAT with "Copilot Requests", from your secret store</span>
+<span class="l"><span class="t-prompt">$</span> <span class="t-cmd">export COPILOT_GITHUB_TOKEN="$SHIPTRACK_COPILOT_PAT"</span></span>
+<span class="l"><span class="t-prompt">$</span> <span class="t-cmd">copilot -p "List the FastAPI routes in app/" --trust-folder</span></span>
+</div></div>
+  <p class="body">Tokens from <code>/login</code> are stored in your OS credential store. If none is available, they fall back to a plaintext file under <code>~/.copilot/</code>, so protect that folder on shared machines.</p>
+</section>
+
+<!-- 7 -->
+<section class="step-panel" data-section="Copilot CLI" data-title="CLI config files" data-sub="~/.copilot and repo settings">
+  <div class="step-header"><div class="phase-tag teal">🗂️ Config</div><h2>Where the CLI keeps its settings</h2><p>Everything user-level lives in <code>~/.copilot</code> (Windows: <code>%USERPROFILE%\.copilot</code>). Set <code>COPILOT_HOME</code> to move it; the old <code>--config-dir</code> flag is deprecated.</p></div>
+
+  <div class="filetree"><div class="ft-header">~/.copilot (the parts you will touch)</div>
+<pre><span class="ft-folder">~/.copilot/</span>
+├── <span class="ft-file">settings.json</span>             <span class="ft-note">YOUR settings (JSONC: comments allowed)</span>
+├── <span class="ft-file">config.json</span>               <span class="ft-note">internal state: auth, plugins, trusted folders (don't hand-edit)</span>
+├── <span class="ft-file">copilot-instructions.md</span>   <span class="ft-note">personal instructions for every repo</span>
+├── <span class="ft-folder">instructions/</span>             <span class="ft-note">personal *.instructions.md files</span>
+├── <span class="ft-folder">agents/</span>  <span class="ft-folder">skills/</span>  <span class="ft-folder">hooks/</span>    <span class="ft-note">personal customizations</span>
+├── <span class="ft-file">mcp-config.json</span>           <span class="ft-note">personal MCP servers</span>
+├── <span class="ft-file">permissions-config.json</span>   <span class="ft-note">"remember for this repo" tool approvals</span>
+├── <span class="ft-file">providers.json</span>            <span class="ft-note">bring-your-own-key model providers</span>
+├── <span class="ft-folder">session-state/</span>            <span class="ft-note">saved sessions (for /resume)</span>
+└── <span class="ft-folder">logs/</span>                     <span class="ft-note">attach these to bug reports</span></pre></div>
+  <div class="callout warn"><div class="icon">⚠️</div><p><strong>Changed in 2026:</strong> user settings moved to <code>settings.json</code>. <code>config.json</code> is now internal state only. Older blog posts that tell you to edit <code>config.json</code> are out of date.</p></div>
+
+  <h3 class="subsection">Three scopes</h3>
+  <div class="tbl-wrap"><table class="tbl">
+    <tr><th>Scope</th><th>File</th><th>Committed?</th><th>Set with</th></tr>
+    <tr><td><strong>User</strong></td><td><code>~/.copilot/settings.json</code></td><td>No</td><td><code>copilot config KEY VALUE --global</code></td></tr>
+    <tr><td><strong>Repo</strong></td><td><code>.github/copilot/settings.json</code></td><td>Yes</td><td><code>copilot config KEY VALUE --repo</code></td></tr>
+    <tr><td><strong>Repo, personal</strong></td><td><code>.github/copilot/settings.local.json</code></td><td>No (git-ignore it)</td><td><code>copilot config KEY VALUE --local</code></td></tr>
+  </table></div>
+  <p class="body">Only some keys can be overridden at repo level. Use <code>/settings</code> (alias <code>/config</code>) inside a session to browse what is available.</p>
+
+  <h3 class="subsection">Example: ShipTrack worktrees branch from main</h3>
+  <div class="terminal"><div class="terminal-header"><div class="terminal-dots"><div class="dot dot-r"></div><div class="dot dot-y"></div><div class="dot dot-g"></div></div><div class="terminal-title">bash — shiptrack</div></div><div class="terminal-body">
+<span class="l"><span class="t-prompt">$</span> <span class="t-cmd">copilot config worktreeBaseRef defaultBranch --repo</span></span>
+</div></div>
+  <div class="doc"><div class="doc-bar">.github/copilot/settings.json<span class="state">committed</span></div><div class="doc-body"><span class="md-c">// new worktrees start from the default branch, not your current HEAD</span>
+{
+  <span class="md-k">"worktreeBaseRef"</span>: <span class="md-s">"defaultBranch"</span>
+}</div></div>
+
+  <h3 class="subsection">Useful environment variables</h3>
+  <ul class="body">
+    <li><code>COPILOT_HOME</code>: move the config folder.</li>
+    <li><code>COPILOT_MODEL</code>: default model for new sessions.</li>
+    <li><code>COPILOT_AUTO_UPDATE=false</code>: stop auto-updates.</li>
+    <li><code>COPILOT_GITHUB_TOKEN</code>: token for headless use (see Step 4).</li>
+  </ul>
+</section>
+
+<!-- 8 -->
+<section class="step-panel" data-section="Enterprise" data-title="Proxy &amp; enterprise" data-sub="Hosts, policy, networks">
+  <div class="step-header"><div class="phase-tag amber">🏢 Enterprise</div><h2>Behind a proxy or on a managed laptop</h2><p>Northwind laptops are managed by IT and sit behind a corporate proxy. Here is what we can confirm, and where to check the rest.</p></div>
+
+  <div class="cards">
+    <div class="card blue"><h4>GHE.com hosts</h4><p>VS Code: <em>Continue with GHE.com</em>. CLI: <code>copilot login --host URL</code>, or set <code>COPILOT_GH_HOST</code> (or <code>GH_HOST</code>).</p></div>
+    <div class="card amber"><h4>Organisation policy</h4><p>Owners can disable MCP servers, use an MCP allowlist (blocked if not listed), and stop users from using <code>/allow-all</code>.</p></div>
+    <div class="card purple"><h4>Managed policy files</h4><p>IT can ship hooks via <code>/etc/github-copilot/policy.d/</code>, <code>C:\ProgramData\GitHub\Copilot\policy.d\</code> or the Windows registry. They always run.</p></div>
+    <div class="card teal"><h4>Sandbox floor</h4><p>Enterprises can enforce a minimum sandbox for the CLI and VS Code agents. See <a href="Copilot_Sim_Security.html">Security</a>.</p></div>
+  </div>
+
+  <div class="callout warn"><div class="icon">⚠️</div><p><strong>Proxy settings: check current docs.</strong> The official pages we read do not document which proxy variables (for example <code>HTTPS_PROXY</code>) the Copilot CLI honours, or how it handles a corporate TLS-inspection certificate. VS Code has its own network and proxy settings. Before rolling out, ask IT to test one machine and read the latest <a href="https://code.visualstudio.com/docs/setup/copilot">VS Code Copilot setup</a> and <a href="https://docs.github.com/en/copilot/how-tos/copilot-cli/set-up-copilot-cli/install-copilot-cli">CLI install</a> pages.</p></div>
+
+  <h3 class="subsection">Ask your admins for</h3>
+  <ul class="check-list">
+    <li><span class="ci">○</span><div>Your seat assignment and which Copilot features are enabled for the <code>northwind</code> org.</div></li>
+    <li><span class="ci">○</span><div>Whether Copilot Memory is enabled. It is off for Business/Enterprise until an owner turns it on.</div></li>
+    <li><span class="ci">○</span><div>The approved list of MCP servers, and whether the built-in GitHub MCP server is allowed.</div></li>
+    <li><span class="ci">○</span><div>Outbound access to GitHub and Copilot hosts through the proxy (IT will need the current host list from GitHub's docs).</div></li>
+  </ul>
+</section>
+
+<!-- 9 -->
+<section class="step-panel" data-section="Finish" data-title="Troubleshooting" data-sub="Symptom → fix">
+  <div class="step-header"><div class="phase-tag coral">🩺 Fix it</div><h2>Common problems</h2><p>Find your symptom, apply the fix, then repeat the check from Step 3 (VS Code) or Step 6 (CLI).</p></div>
+
+  <div class="tbl-wrap"><table class="tbl">
+    <tr><th>Symptom</th><th>Likely cause</th><th>Fix</th></tr>
+    <tr><td>No Copilot icon or chat in VS Code</td><td>AI features turned off, or extension missing</td><td>Set <code>chat.disableAIFeatures</code> to <code>false</code>; check the <em>GitHub Copilot Chat</em> extension is installed and enabled.</td></tr>
+    <tr><td>VS Code uses your personal account at work</td><td>Wrong account picked</td><td>Accounts → <em>Manage Extension Account Preferences</em> → <em>GitHub Copilot Chat</em>.</td></tr>
+    <tr><td>Sign-in loop on a GHE.com account</td><td>Signing in to github.com</td><td><em>Continue with GHE.com</em>, or <code>"authProvider": "github-enterprise"</code>.</td></tr>
+    <tr><td><code>npm install -g</code> fails or the CLI won't start</td><td>Node.js older than 22</td><td>Upgrade Node, or use WinGet / Homebrew / the script.</td></tr>
+    <tr><td>npm install "succeeds" but <code>copilot</code> is broken</td><td><code>ignore-scripts=true</code> in <code>~/.npmrc</code></td><td><code>npm_config_ignore_scripts=false npm install -g @github/copilot</code></td></tr>
+    <tr><td>Windows: errors in old PowerShell</td><td>Windows PowerShell 5.1</td><td>Install and use PowerShell 7 (v6+ required).</td></tr>
+    <tr><td><code>copilot: command not found</code> after the script</td><td>Install folder not on <code>PATH</code></td><td>Add the <code>bin</code> folder under <code>PREFIX</code> (default <code>$HOME/.local</code>) to <code>PATH</code>; open a new shell.</td></tr>
+    <tr><td>Token rejected</td><td>Classic <code>ghp_</code> PAT, or missing permission</td><td>Use a fine-grained PAT with <strong>Copilot Requests</strong>.</td></tr>
+    <tr><td>CLI signed in as the wrong user</td><td><code>GH_TOKEN</code>/<code>GITHUB_TOKEN</code> set in the shell</td><td>Unset them, or set <code>COPILOT_GITHUB_TOKEN</code> deliberately. Check with <code>/user</code>.</td></tr>
+    <tr><td>Repo hooks or <code>.mcp.json</code> ignored</td><td>Folder not trusted</td><td>Restart <code>copilot</code> in the repo and trust the folder.</td></tr>
+    <tr><td>Hooks don't run with <code>copilot -p</code></td><td>Repo hooks are off in prompt mode</td><td>Set <code>GITHUB_COPILOT_PROMPT_MODE_REPO_HOOKS=true</code> (similar variables exist for workspace MCP and extensions).</td></tr>
+    <tr><td><code>/allow-all</code> refused</td><td>Device or org policy</td><td>Expected on managed machines. Use per-tool approvals.</td></tr>
+    <tr><td>Requests start failing late in the month</td><td>AI Credits used up, or a limit hit</td><td>Check <code>/usage</code> and <code>/limits</code> in the CLI.</td></tr>
+  </table></div>
+  <div class="callout tip"><div class="icon">💡</div><p>Still stuck? Run <code>/feedback</code> in the CLI, and attach logs from <code>~/.copilot/logs/</code> (or start with <code>--log-level</code> for more detail).</p></div>
+</section>
+
+<!-- 10 -->
+<section class="step-panel" data-section="Finish" data-title="Verification checklist" data-sub="Tick as you go">
+  <div class="step-header"><div class="phase-tag green">🏁 Done?</div><h2>Setup verification checklist</h2><p>Leo ticks these off on day one. Your progress is saved in this browser only.</p></div>
+
+  <ul class="track" data-key="setup-verify" data-meter="setup-meter">
+    <li><div>I know my plan or seat, and which org policies apply to me.</div></li>
+    <li><div><code>code --version</code> works in a new terminal.</div></li>
+    <li><div>VS Code shows the right GitHub account under Accounts.</div></li>
+    <li><div>An <strong>Ask</strong> question in the Chat view answered using real repo files.</div></li>
+    <li><div>An inline suggestion appeared while typing.</div></li>
+    <li><div><code>copilot version</code> prints a version.</div></li>
+    <li><div><code>/login</code> succeeded and <code>/user</code> shows the expected account.</div></li>
+    <li><div>I trusted the ShipTrack folder and got an answer to a first prompt.</div></li>
+    <li><div>No stray <code>GH_TOKEN</code>/<code>GITHUB_TOKEN</code> is overriding my login.</div></li>
+    <li><div>I know where <code>~/.copilot/settings.json</code> is, and that <code>config.json</code> is not for hand edits.</div></li>
+  </ul>
+  <p class="track-meter" id="setup-meter"></p>
+</section>
+
+<!-- 11 -->
+<section class="step-panel" data-section="Finish" data-title="Where to go next" data-sub="Keep going">
+  <div class="step-header"><div class="phase-tag teal">🧭 Next</div><h2>Where to go next</h2><p>You are set up on both surfaces. Pick your next stop.</p></div>
+  <div class="cards">
+    <div class="card blue"><h4><a href="Copilot_Sim_Customize.html">🧩 Skills, Agents, Tools, Hooks, MCP</a></h4><p>Teach Copilot ShipTrack's conventions and connect it to tools.</p></div>
+    <div class="card coral"><h4><a href="Copilot_Sim_Security.html">🛡️ Security &amp; worktrees</a></h4><p>Approvals, trusted folders, sandboxing and isolating agents.</p></div>
+    <div class="card green"><h4><a href="Copilot_Sim_Greenfield.html">🌱 Greenfield: ShipTrack</a></h4><p>Build the API from a brief to a CI-green pull request.</p></div>
+    <div class="card amber"><h4><a href="Copilot_Sim_Brownfield.html">🏢 Brownfield: Ledgerly</a></h4><p>Understand and safely change a legacy Django monolith.</p></div>
+    <div class="card purple"><h4><a href="Copilot_VSCode_vs_CLI.html">⚖️ VS Code vs CLI</a></h4><p>When to use which surface.</p></div>
+    <div class="card teal"><h4><a href="Copilot_FAQ.html">❓ FAQ</a></h4><p>Quick answers on setup, cost and daily use.</p></div>
+  </div>
+  <p class="body">Official docs: <a href="https://code.visualstudio.com/docs/setup/copilot">Set up Copilot in VS Code</a> · <a href="https://docs.github.com/en/copilot/how-tos/copilot-cli/set-up-copilot-cli/install-copilot-cli">Install the Copilot CLI</a> · <a href="https://docs.github.com/en/copilot/reference/copilot-cli-reference/cli-command-reference">CLI command reference</a> · <a href="https://github.com/github/copilot-cli">github/copilot-cli</a>.</p>
+</section>
+
+    </div>
+  </main>
+</div>
+<script src="assets/copilot-sim.js?v=1"></script>
+<script src="assets/copilot-kit.js?v=1"></script>
+</body>
+</html>

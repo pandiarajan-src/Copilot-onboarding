@@ -1,0 +1,375 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>GitHub Copilot Training Programme · Copilot Onboarding Hub</title>
+<meta name="description" content="A modular GitHub Copilot training programme for professional developers: eight modules from foundations to brownfield work, six hands-on labs on ShipTrack and Ledgerly, and a ten-question certification quiz.">
+<link rel="stylesheet" href="assets/copilot-sim.css?v=1">
+<link rel="stylesheet" href="assets/copilot-kit.css?v=1">
+</head>
+<body>
+<header class="sim-header">
+  <div class="icon">🎓</div>
+  <div>
+    <h1>Training Programme</h1>
+    <p>Eight modules, six hands-on labs and a certification quiz that take a developer from first sign-in to agent-driven work on real Northwind Logistics codebases.</p>
+    <div class="stack-pills"><span class="pill">Updated November 2026</span><span class="pill">≈ 12 hours total</span><span class="pill">VS Code · Copilot CLI</span><span class="pill">ShipTrack · Ledgerly</span><span class="pill">L100 → L300</span></div>
+  </div>
+  <a class="home-link" href="index.html">⌂ All guides</a>
+</header>
+<div class="wrap">
+
+  <div class="callout info"><div class="icon">ℹ️</div><p><strong>How to use this page.</strong> Work through the modules in order. Each module links to the guide that teaches it. Do the matching lab on a real machine, tick its checklist, then take the quiz at the end. Ticks are saved in this browser only.</p></div>
+
+  <h2 class="sec">Programme at a glance</h2>
+  <div class="tbl-wrap"><table class="tbl">
+    <tr><th>Who</th><th>Role at Northwind</th><th>Suggested route</th></tr>
+    <tr><td>Leo</td><td>New developer</td><td>M1 → M8 in order, all six labs</td></tr>
+    <tr><td>Priya</td><td>Senior backend developer</td><td>Skim M1–M2, focus on M3, M5, M7, labs 2, 3, 5</td></tr>
+    <tr><td>Marco</td><td>Tech lead</td><td>M4, M5, M6, M8, labs 2, 4, 6, then the <a href="Copilot_Onboarding_Kit.html">rollout checklist</a></td></tr>
+    <tr><td>Sam</td><td>Security engineer</td><td>M1, M5, M6, lab 5 (review the MCP config), quiz</td></tr>
+  </table></div>
+
+  <h2 class="sec">Modules</h2>
+
+  <div class="module"><div class="mhead"><span class="lvl l100">L100</span><h4>M1 · Foundations</h4><span class="dur">45 min</span></div>
+    <ul>
+      <li>Explain what Copilot does: inline and next edit suggestions, chat, agents, code review, the CLI and MCP tools.</li>
+      <li>Describe the loop: your prompt plus gathered context goes to a model; agents call tools, read results and continue.</li>
+      <li>Know how usage is billed in GitHub AI Credits and why premium models cost more credits.</li>
+      <li>State the ground rules: review every change, never paste secrets, keep tool approvals on.</li>
+    </ul>
+    <div class="lab"><strong>Guide:</strong> <a href="Copilot_Intro.html">Introduction</a> and <a href="Copilot_Feature_Tour.html">Feature Tour</a>.</div></div>
+
+  <div class="module"><div class="mhead"><span class="lvl l100">L100</span><h4>M2 · Setup</h4><span class="dur">45 min</span></div>
+    <ul>
+      <li>Sign in to Copilot in VS Code from the status bar on Windows, macOS or Linux.</li>
+      <li>Install the Copilot CLI with npm, WinGet, Homebrew or the install script, and log in with <code>/login</code>.</li>
+      <li>Find the user config folder <code>~/.copilot</code> and the repo-level <code>.github/copilot/settings.json</code>.</li>
+      <li>Check the installed version with <code>copilot version</code> and update with <code>copilot update</code>.</li>
+    </ul>
+    <div class="lab"><strong>Guide:</strong> <a href="Copilot_Sim_Setup.html">Setup simulator</a>. <strong>Lab:</strong> Lab 1.</div></div>
+
+  <div class="module"><div class="mhead"><span class="lvl l100">L100</span><h4>M3 · Chat &amp; Agent mode</h4><span class="dur">90 min</span></div>
+    <ul>
+      <li>Pick the right built-in agent: <strong>Ask</strong> for read-only questions, <strong>Plan</strong> (<code>/plan</code>) to agree an approach, <strong>Agent</strong> to make changes.</li>
+      <li>Choose a model in the model picker, or leave it on <code>auto</code>.</li>
+      <li>Use the permission levels Manual, Assisted and Allow all, and know that Autopilot auto-approves.</li>
+      <li>Run parallel sessions in the Agents window with Branch or New Worktree isolation.</li>
+    </ul>
+    <div class="lab"><strong>Guide:</strong> <a href="Copilot_Feature_Tour.html">Feature Tour</a> and <a href="Copilot_Sim_Greenfield.html">Greenfield run</a>. <strong>Lab:</strong> Lab 3.</div></div>
+
+  <div class="module"><div class="mhead"><span class="lvl l200">L200</span><h4>M4 · Copilot CLI</h4><span class="dur">90 min</span></div>
+    <ul>
+      <li>Work in the interactive TUI: <code>@FILE</code> mentions, <code>!CMD</code> shell escapes, Shift+Tab to cycle standard, plan and autopilot modes.</li>
+      <li>Use the everyday slash commands: <code>/model</code>, <code>/context</code>, <code>/compact</code>, <code>/review</code>, <code>/usage</code>, <code>/undo</code>.</li>
+      <li>Isolate work with <code>/new worktree</code> or <code>git worktree add</code>, and hand off with <code>/delegate</code>.</li>
+      <li>Script non-interactive runs with <code>copilot -p</code> and scoped <code>--allow-tool</code> / <code>--deny-tool</code> flags.</li>
+    </ul>
+    <div class="lab"><strong>Guide:</strong> <a href="Copilot_VSCode_vs_CLI.html">VS Code vs CLI</a>. <strong>Lab:</strong> Lab 4.</div></div>
+
+  <div class="module"><div class="mhead"><span class="lvl l200">L200</span><h4>M5 · Customization: instructions, skills, agents, hooks, MCP</h4><span class="dur">2 h</span></div>
+    <ul>
+      <li>Write <code>.github/copilot-instructions.md</code>, <code>AGENTS.md</code> and path-scoped <code>.github/instructions/*.instructions.md</code> files with <code>applyTo</code>.</li>
+      <li>Package a repeatable task as a skill in <code>.github/skills/&lt;name&gt;/SKILL.md</code> and call it as <code>/&lt;name&gt;</code>.</li>
+      <li>Create a custom agent in <code>.github/agents/*.agent.md</code> with a limited <code>tools</code> list.</li>
+      <li>Add a <code>preToolUse</code> hook in <code>.github/hooks/*.json</code>, and an MCP server in <code>.mcp.json</code> (<code>mcpServers</code>).</li>
+    </ul>
+    <div class="lab"><strong>Guide:</strong> <a href="Copilot_Sim_Customize.html">Customize simulator</a>. <strong>Labs:</strong> Lab 2 and Lab 5.</div></div>
+
+  <div class="module"><div class="mhead"><span class="lvl l200">L200</span><h4>M6 · Security</h4><span class="dur">75 min</span></div>
+    <ul>
+      <li>Set approvals deliberately: CLI once / session / remember per repo, and why <code>--allow-all</code> lets a shell do anything your user can.</li>
+      <li>Know that a deny rule always beats an allow rule, even with <code>--allow-all</code>.</li>
+      <li>Understand trusted folders, the VS Code agent sandbox (network stays allowed by default) and what worktrees do not isolate.</li>
+      <li>Treat MCP output, web pages and repo files as possible prompt injection. Content exclusion is not a security boundary.</li>
+    </ul>
+    <div class="lab"><strong>Guide:</strong> <a href="Copilot_Sim_Security.html">Security simulator</a>. <strong>Lab:</strong> Sam reviews your Lab 5 config.</div></div>
+
+  <div class="module"><div class="mhead"><span class="lvl l300">L300</span><h4>M7 · Greenfield lab: ShipTrack</h4><span class="dur">3 h</span></div>
+    <ul>
+      <li>Plan a FastAPI service with Copilot before writing code, and capture the plan in the repo.</li>
+      <li>Build endpoints test-first with pytest and httpx, keeping <code>ruff</code> clean.</li>
+      <li>Drive Alembic migrations through the agent and review each one by hand.</li>
+      <li>Open a pull request and ask for a Copilot review before a human review.</li>
+    </ul>
+    <div class="lab"><strong>Guide:</strong> <a href="Copilot_Sim_Greenfield.html">Greenfield simulator</a>. <strong>Labs:</strong> Lab 2, Lab 3, Lab 4.</div></div>
+
+  <div class="module"><div class="mhead"><span class="lvl l300">L300</span><h4>M8 · Brownfield lab: Ledgerly</h4><span class="dur">3 h</span></div>
+    <ul>
+      <li>Map an unfamiliar Django monolith with read-only questions before touching code.</li>
+      <li>Write an <code>AGENTS.md</code> that captures what you learned, so every session starts informed.</li>
+      <li>Pin current behaviour with characterization tests before any refactor.</li>
+      <li>Split the 600-line <code>invoices/views.py</code> in small, reviewable steps, and keep team knowledge current with Copilot Memory.</li>
+    </ul>
+    <div class="lab"><strong>Guide:</strong> <a href="Copilot_Sim_Brownfield.html">Brownfield simulator</a> and <a href="Copilot_Sim_Knowledge.html">Knowledge loop</a>. <strong>Lab:</strong> Lab 6.</div></div>
+
+  <h2 class="sec">Programme progress</h2>
+  <ul class="track" data-key="cp-train-programme" data-meter="cp-train-programme-m">
+    <li><div>M1 · Foundations</div></li>
+    <li><div>M2 · Setup + Lab 1</div></li>
+    <li><div>M3 · Chat &amp; Agent mode + Lab 3</div></li>
+    <li><div>M4 · CLI + Lab 4</div></li>
+    <li><div>M5 · Customization + Labs 2 and 5</div></li>
+    <li><div>M6 · Security</div></li>
+    <li><div>M7 · Greenfield (ShipTrack)</div></li>
+    <li><div>M8 · Brownfield (Ledgerly) + Lab 6</div></li>
+    <li><div>Certification quiz passed (8/10 or better)</div></li>
+  </ul>
+  <div class="meter" data-track="cp-train-programme"><span style="width:0%"></span></div>
+  <p class="track-meter" id="cp-train-programme-m"></p>
+
+  <h2 class="sec">Hands-on labs</h2>
+  <p class="body">Each lab is a real task on a real machine. Use a scratch copy of the repos, not production. Every lab ends with a checklist you can tick.</p>
+
+  <!-- Lab 1 -->
+  <h3 class="sub">Lab 1 · Set up and send your first prompts <span class="pill">30 min</span></h3>
+  <p class="body">Leo's first morning. Goal: Copilot working in VS Code and in the terminal, and three useful answers about ShipTrack.</p>
+  <ol class="body">
+    <li>Install the latest stable VS Code from code.visualstudio.com.</li>
+    <li>Click the Copilot icon in the status bar, choose <strong>Use AI Features</strong> and sign in with GitHub. (Command Palette alternative: <strong>GitHub Copilot: Sign in</strong>.)</li>
+    <li>Install the CLI with one command for your OS (table below). Windows needs PowerShell 6 or later; npm needs Node.js 22+.</li>
+    <li>Run <code>copilot version</code> to confirm the install.</li>
+    <li>Clone ShipTrack, start <code>copilot</code> in it, trust the folder when asked, and run <code>/login</code>.</li>
+    <li>In VS Code Chat, pick <strong>Ask</strong> and send: <em>"Explain the folder layout of this repo and where the API routes live."</em></li>
+    <li>In the CLI send: <em>"Which commands run the tests and the linter here? Read the config files, don't guess."</em></li>
+    <li>Run <code>/usage</code> to see what your session used in AI Credits.</li>
+  </ol>
+  <div class="tbl-wrap"><table class="tbl">
+    <tr><th>OS</th><th>Install command</th></tr>
+    <tr><td>Windows</td><td><code>winget install GitHub.Copilot</code></td></tr>
+    <tr><td>macOS</td><td><code>brew install --cask copilot-cli</code> (the README shows <code>brew install copilot-cli</code>; the docs use the cask)</td></tr>
+    <tr><td>macOS / Linux</td><td><code>curl -fsSL https://gh.io/copilot-install | bash</code></td></tr>
+    <tr><td>Any OS with Node.js 22+</td><td><code>npm install -g @github/copilot</code></td></tr>
+  </table></div>
+  <div class="terminal"><div class="terminal-header"><div class="terminal-dots"><div class="dot dot-r"></div><div class="dot dot-y"></div><div class="dot dot-g"></div></div><div class="terminal-title">bash — shiptrack</div></div><div class="terminal-body">
+<span class="l"><span class="t-prompt">$</span> <span class="t-cmd">git clone https://github.com/northwind/shiptrack.git &amp;&amp; cd shiptrack</span></span>
+<span class="l"><span class="t-prompt">$</span> <span class="t-cmd">copilot version</span></span>
+<span class="l"><span class="t-prompt">$</span> <span class="t-cmd">copilot</span></span>
+<span class="l"><span class="t-comment"># trust the folder when prompted, then:</span></span>
+<span class="l"><span class="t-prompt">&gt;</span> <span class="t-cmd">/login</span></span>
+<span class="l"><span class="t-prompt">&gt;</span> <span class="t-cmd">/usage</span></span>
+</div></div>
+  <ul class="track" data-key="cp-train-lab1" data-meter="cp-train-lab1-m">
+    <li><div>Signed in to Copilot in VS Code</div></li>
+    <li><div>Installed the CLI and ran <code>copilot version</code></div></li>
+    <li><div>Logged in with <code>/login</code> and trusted the ShipTrack folder</div></li>
+    <li><div>Got a repo layout answer in Ask</div></li>
+    <li><div>Got the test and lint commands from the CLI</div></li>
+    <li><div>Checked usage with <code>/usage</code></div></li>
+  </ul>
+  <div class="meter" data-track="cp-train-lab1"><span style="width:0%"></span></div>
+  <p class="track-meter" id="cp-train-lab1-m"></p>
+
+  <!-- Lab 2 -->
+  <h3 class="sub">Lab 2 · Write copilot-instructions.md for ShipTrack <span class="pill">40 min</span></h3>
+  <p class="body">Priya and Marco agree the house rules once, so every chat and CLI session follows them.</p>
+  <ol class="body">
+    <li>In the CLI, run <code>/init</code> to draft <code>.github/copilot-instructions.md</code> from the repo.</li>
+    <li>Edit the draft down to short, checkable rules: stack, layout, commands, testing rule, never-do list. Aim for under 40 lines.</li>
+    <li>Add a scoped file <code>.github/instructions/tests.instructions.md</code> with <code>applyTo: "tests/**"</code> for test-only rules.</li>
+    <li>Confirm the files load: <code>copilot instruction list</code> in a terminal, or <code>/instructions</code> inside a session.</li>
+    <li>Ask the same question with and without the file (toggle it in <code>/instructions</code>): <em>"Add a GET /shipments endpoint."</em> Compare the answers.</li>
+    <li>Open a pull request so Marco can review the rules like any other code.</li>
+  </ol>
+  <div class="doc"><div class="doc-bar">.github/copilot-instructions.md<span class="state">draft</span></div><div class="doc-body"><span class="md-h"># ShipTrack: instructions for Copilot</span>
+
+<span class="md-h">## Stack</span>
+- Python 3.12, FastAPI, Pydantic v2, SQLAlchemy 2, Alembic, PostgreSQL.
+- Pydantic schemas live in <span class="md-c">app/schemas/</span>, ORM models in <span class="md-c">app/models/</span>, routers in <span class="md-c">app/api/</span>.
+
+<span class="md-h">## Commands</span>
+- Tests: <span class="md-c">pytest -q</span>
+- Lint and format: <span class="md-c">ruff check .</span> and <span class="md-c">ruff format .</span>
+
+<span class="md-h">## Rules</span>
+- <span class="md-k">Every</span> new endpoint ships with tests: one happy path, at least two error cases.
+- Schema changes go through a new Alembic revision. Never edit an applied revision.
+- Return Pydantic models from routes, not ORM objects.
+
+<span class="md-h">## Never</span>
+- Commit secrets or <span class="md-c">.env</span> files.
+- Add a dependency without saying why in the PR.</div></div>
+  <div class="doc"><div class="doc-bar">.github/instructions/tests.instructions.md<span class="state">new</span></div><div class="doc-body"><span class="md-k">---</span>
+<span class="md-k">name:</span> <span class="md-s">tests</span>
+<span class="md-k">description:</span> <span class="md-s">Rules for ShipTrack tests</span>
+<span class="md-k">applyTo:</span> <span class="md-s">"tests/**"</span>
+<span class="md-k">---</span>
+- Use httpx with the FastAPI app; no live network calls.
+- One behaviour per test; name tests <span class="md-c">test_&lt;endpoint&gt;_&lt;case&gt;</span>.</div></div>
+  <div class="callout tip"><div class="icon">💡</div><p>Instructions shape chat and agent answers. They do not change inline suggestions.</p></div>
+  <ul class="track" data-key="cp-train-lab2" data-meter="cp-train-lab2-m">
+    <li><div>Drafted the file with <code>/init</code></div></li>
+    <li><div>Cut it to short, checkable rules (under 40 lines)</div></li>
+    <li><div>Added <code>tests.instructions.md</code> with <code>applyTo</code></div></li>
+    <li><div>Confirmed both files load</div></li>
+    <li><div>Compared answers with and without the file</div></li>
+    <li><div>Opened a PR for Marco to review</div></li>
+  </ul>
+  <div class="meter" data-track="cp-train-lab2"><span style="width:0%"></span></div>
+  <p class="track-meter" id="cp-train-lab2-m"></p>
+
+  <!-- Lab 3 -->
+  <h3 class="sub">Lab 3 · Build an endpoint with tests in agent mode <span class="pill">60 min</span></h3>
+  <p class="body">Priya adds <code>GET /shipments/{id}/events</code> in VS Code. Plan first, then let the agent work with Manual approvals.</p>
+  <ol class="body">
+    <li>Create a branch: <code>git switch -c feat/shipment-events</code>.</li>
+    <li>In Chat, run <code>/plan</code> with the prompt below. Read the plan. Push back on anything that breaks your instructions file.</li>
+    <li>Switch to <strong>Agent</strong>. Keep the permission level on <strong>Manual</strong> so you approve each command and edit.</li>
+    <li>Ask the agent to write the tests first and run them, so you see them fail.</li>
+    <li>Let it implement the route, then run <code>pytest -q</code> and <code>ruff check .</code> until both pass.</li>
+    <li>Read the full diff yourself. Check the 404 path, ordering of events and the response model.</li>
+    <li>Commit and open a pull request.</li>
+  </ol>
+  <div class="chat"><div class="chat-header copilot">🤖 VS Code · Copilot Chat <span class="tag">Plan · shiptrack</span></div><div class="chat-body">
+    <div class="msg user"><div class="who">Priya</div><div class="bubble">/plan Add GET /shipments/{id}/events. It returns the shipment's events oldest first as a list of EventOut. Return 404 if the shipment does not exist. Write pytest + httpx tests first: happy path, unknown id, shipment with no events. Follow .github/copilot-instructions.md.</div></div>
+    <div class="msg ai"><div class="who">Copilot</div><div class="bubble">Plan: 1) add EventOut schema, 2) write three tests in tests/test_events.py, 3) add the route in app/api/shipments.py, 4) run pytest and ruff. No migration needed. Proceed?</div></div>
+  </div></div>
+  <ul class="track" data-key="cp-train-lab3" data-meter="cp-train-lab3-m">
+    <li><div>Created the feature branch</div></li>
+    <li><div>Reviewed and adjusted the <code>/plan</code> output</div></li>
+    <li><div>Ran the agent with Manual approvals</div></li>
+    <li><div>Saw the new tests fail before the route existed</div></li>
+    <li><div><code>pytest -q</code> and <code>ruff check .</code> both pass</div></li>
+    <li><div>Read every line of the diff myself</div></li>
+    <li><div>Opened the pull request</div></li>
+  </ul>
+  <div class="meter" data-track="cp-train-lab3"><span style="width:0%"></span></div>
+  <p class="track-meter" id="cp-train-lab3-m"></p>
+
+  <!-- Lab 4 -->
+  <h3 class="sub">Lab 4 · Use the CLI in a worktree <span class="pill">45 min</span></h3>
+  <p class="body">Marco tightens the ruff rules without disturbing Priya's branch. A worktree gives the agent its own copy of the files.</p>
+  <ol class="body">
+    <li>From the ShipTrack folder, create a worktree: <code>git worktree add ../shiptrack-ruff -b chore/ruff-rules</code>. (Inside a session, <code>/new worktree</code> does the same job.)</li>
+    <li><code>cd ../shiptrack-ruff</code> and start <code>copilot</code>. Trust the new folder.</li>
+    <li>Press Shift+Tab until the mode shows <strong>plan</strong>, then send the prompt below.</li>
+    <li>Approve the plan, switch back to standard mode and let it work. Approve commands once, not for the whole session.</li>
+    <li>Check the result with <code>!git diff --stat</code> and <code>!ruff check .</code>.</li>
+    <li>Run <code>/review</code> for a Copilot review of the change before you commit.</li>
+    <li>Commit, push, and open the PR with <code>/pr create</code>. When merged, remove the tree: <code>git worktree remove ../shiptrack-ruff</code>.</li>
+  </ol>
+  <div class="terminal"><div class="terminal-header"><div class="terminal-dots"><div class="dot dot-r"></div><div class="dot dot-y"></div><div class="dot dot-g"></div></div><div class="terminal-title">bash — shiptrack-ruff</div></div><div class="terminal-body">
+<span class="l"><span class="t-prompt">$</span> <span class="t-cmd">git worktree add ../shiptrack-ruff -b chore/ruff-rules</span></span>
+<span class="l"><span class="t-prompt">$</span> <span class="t-cmd">cd ../shiptrack-ruff &amp;&amp; copilot</span></span>
+<span class="l"><span class="t-comment"># Shift+Tab → plan mode</span></span>
+<span class="l"><span class="t-prompt">&gt;</span> <span class="t-cmd">Enable ruff rule sets for imports and bugbear in pyproject.toml, fix what they flag, no behaviour changes.</span></span>
+<span class="l"><span class="t-prompt">&gt;</span> <span class="t-cmd">!git diff --stat</span></span>
+<span class="l"><span class="t-prompt">&gt;</span> <span class="t-cmd">/review</span></span>
+<span class="l"><span class="t-prompt">&gt;</span> <span class="t-cmd">/pr create</span></span>
+</div></div>
+  <div class="callout warn"><div class="icon">⚠️</div><p>A worktree isolates files only. The agent can still reach your network and anything your user account can. Keep approvals on.</p></div>
+  <ul class="track" data-key="cp-train-lab4" data-meter="cp-train-lab4-m">
+    <li><div>Created a worktree on its own branch</div></li>
+    <li><div>Started <code>copilot</code> in the worktree and trusted it</div></li>
+    <li><div>Used plan mode (Shift+Tab) before any edits</div></li>
+    <li><div>Approved commands one at a time</div></li>
+    <li><div>Ran <code>/review</code> on the change</div></li>
+    <li><div>Opened the PR and removed the worktree after merge</div></li>
+  </ul>
+  <div class="meter" data-track="cp-train-lab4"><span style="width:0%"></span></div>
+  <p class="track-meter" id="cp-train-lab4-m"></p>
+
+  <!-- Lab 5 -->
+  <h3 class="sub">Lab 5 · Add an MCP server <span class="pill">45 min</span></h3>
+  <p class="body">MCP servers give the agent new tools. Start with the built-in GitHub server, then add one server from Northwind's approved list and have Sam review it.</p>
+  <ol class="body">
+    <li>In the CLI run <code>/mcp list</code>. The built-in GitHub MCP server is on by default.</li>
+    <li>Try it: <em>"List open issues labelled bug in northwind/shiptrack."</em> Approve the tool call once.</li>
+    <li>Pick one server from the approved list. In VS Code use <strong>MCP: Browse MCP Servers</strong> or <strong>MCP: Add Server</strong>; in the CLI use <code>/mcp add</code>.</li>
+    <li>To share it with the team, put it in <code>.mcp.json</code> at the repo root under the <code>mcpServers</code> key (shape below). The CLI only loads it in a trusted folder.</li>
+    <li>Run <code>/mcp show</code> and check which tools the server exposes. Disable any you don't need.</li>
+    <li>Ask Sam to review the config: who publishes the server, what it can reach, where credentials come from.</li>
+  </ol>
+  <div class="doc"><div class="doc-bar">.mcp.json<span class="state">new</span></div><div class="doc-body">{
+  <span class="md-k">"mcpServers"</span>: {
+    <span class="md-k">"approved-server"</span>: {
+      <span class="md-k">"command"</span>: <span class="md-s">"&lt;command from the server's README&gt;"</span>,
+      <span class="md-k">"args"</span>: [<span class="md-s">"&lt;arguments&gt;"</span>]
+    }
+  }
+}</div></div>
+  <div class="callout warn"><div class="icon">⚠️</div><p>Never put tokens in <code>.mcp.json</code>. Treat everything an MCP server returns as untrusted input that could carry prompt injection. The <code>.vscode/mcp.json</code> file with a <code>servers</code> key belongs to the deprecated Local harness.</p></div>
+  <ul class="track" data-key="cp-train-lab5" data-meter="cp-train-lab5-m">
+    <li><div>Listed servers with <code>/mcp list</code></div></li>
+    <li><div>Used a GitHub MCP tool and approved it once</div></li>
+    <li><div>Added one approved server</div></li>
+    <li><div>Committed a shared <code>.mcp.json</code> with no secrets</div></li>
+    <li><div>Checked its tools with <code>/mcp show</code></div></li>
+    <li><div>Sam reviewed and signed off the config</div></li>
+  </ul>
+  <div class="meter" data-track="cp-train-lab5"><span style="width:0%"></span></div>
+  <p class="track-meter" id="cp-train-lab5-m"></p>
+
+  <!-- Lab 6 -->
+  <h3 class="sub">Lab 6 · Brownfield characterization tests on Ledgerly <span class="pill">90 min</span></h3>
+  <p class="body">Before anyone refactors the 600-line <code>invoices/views.py</code>, Leo and Priya pin down what it does today, including its odd behaviour.</p>
+  <ol class="body">
+    <li>Create a branch: <code>git switch -c test/invoice-views-characterization</code>.</li>
+    <li>In <strong>Ask</strong>, map the file: <em>"List every view in invoices/views.py with its URL, HTTP methods, permissions and side effects (emails, Celery tasks). Don't change anything."</em></li>
+    <li>Pick three views with the most business logic. Ask for characterization tests that record current output, quirks included. Tell the agent not to fix bugs it finds; list them instead.</li>
+    <li>Run <code>python manage.py test invoices</code>. Every new test must pass against the unchanged code.</li>
+    <li>Mutate one line by hand (for example a rounding call) and confirm at least one test fails. Revert.</li>
+    <li>Record what you learned in <code>AGENTS.md</code>: test command, settings module, Celery in tests, known quirks.</li>
+    <li>Open the PR. The refactor waits for a separate PR once these tests are merged.</li>
+  </ol>
+  <div class="chat"><div class="chat-header copilot">🤖 VS Code · Copilot Chat <span class="tag">Agent · ledgerly</span></div><div class="chat-body">
+    <div class="msg user"><div class="who">Leo</div><div class="bubble">Write characterization tests for invoice_detail, invoice_send and invoice_void in invoices/views.py. Assert today's behaviour exactly, even if it looks wrong. Do not edit views.py. Put any suspected bugs in a list at the end.</div></div>
+    <div class="msg ai"><div class="who">Copilot</div><div class="bubble">Created invoices/tests/test_views_characterization.py with 11 tests. All pass on the current code. Suspected bugs: invoice_void returns 200 for an already-void invoice; totals round half-down.</div></div>
+  </div></div>
+  <ul class="track" data-key="cp-train-lab6" data-meter="cp-train-lab6-m">
+    <li><div>Mapped <code>invoices/views.py</code> in Ask without changes</div></li>
+    <li><div>Wrote characterization tests for three views</div></li>
+    <li><div>All new tests pass on unchanged code</div></li>
+    <li><div>A hand mutation made a test fail</div></li>
+    <li><div>Suspected bugs listed, not fixed</div></li>
+    <li><div>Updated <code>AGENTS.md</code> with what we learned</div></li>
+    <li><div>Opened the tests-only PR</div></li>
+  </ul>
+  <div class="meter" data-track="cp-train-lab6"><span style="width:0%"></span></div>
+  <p class="track-meter" id="cp-train-lab6-m"></p>
+
+  <h2 class="sec">Certification quiz</h2>
+  <p class="body">Ten questions. Pass mark is 8. Each answer shows a short explanation.</p>
+  <div class="quiz">
+    <div class="q" data-why="The repo-wide file is .github/copilot-instructions.md. AGENTS.md is also read and works across tools."><p>1. Where do repo-wide custom instructions for ShipTrack go?</p><button class="qo">.vscode/copilot.md</button><button class="qo" data-ok><code>.github/copilot-instructions.md</code></button><button class="qo">~/.copilot/settings.json</button></div>
+    <div class="q" data-why="Scoped instruction files live in .github/instructions/ and use applyTo with globs relative to the repo root."><p>2. How do you add rules that apply only to files under <code>tests/</code>?</p><button class="qo">A second copilot-instructions.md inside tests/</button><button class="qo">A comment at the top of each test file</button><button class="qo" data-ok>A <code>.github/instructions/*.instructions.md</code> file with <code>applyTo: "tests/**"</code></button></div>
+    <div class="q" data-why="Workspace MCP files for the CLI and the Copilot harness (.mcp.json or .github/mcp.json) use mcpServers. The servers key is the .vscode/mcp.json format for the Local harness."><p>3. In a shared <code>.mcp.json</code>, which top-level key holds the servers?</p><button class="qo" data-ok><code>mcpServers</code></button><button class="qo"><code>servers</code></button><button class="qo"><code>tools</code></button></div>
+    <div class="q" data-why="Worktrees give each session its own files. Network access and anything your user account can do are unchanged."><p>4. Marco runs an agent in a separate git worktree. What does that isolate?</p><button class="qo">Network access</button><button class="qo" data-ok>The working files only</button><button class="qo">Files, network and credentials</button></div>
+    <div class="q" data-why="--allow-all (and /yolo) removes approval prompts, so a shell command can push, delete or call the network as you."><p>5. What is the main risk of starting the CLI with <code>--allow-all</code>?</p><button class="qo">It uses a cheaper model</button><button class="qo">It disables custom instructions</button><button class="qo" data-ok>Shell commands run without prompts and can do anything your user can</button></div>
+    <div class="q" data-why="A deny rule always wins over an allow rule, even when --allow-all is set."><p>6. You pass <code>--allow-tool='shell(git:*)' --deny-tool='shell(git push)'</code>. The agent tries <code>git push</code>. What happens?</p><button class="qo" data-ok>It is denied</button><button class="qo">It runs, because git:* is allowed</button><button class="qo">You get a prompt</button></div>
+    <div class="q" data-why="Content exclusion reduces what Copilot reads but is not a security boundary: it misses symlinks, remote filesystems and some indirect access."><p>7. Sam asks whether content exclusion stops agents ever reading <code>secrets/</code>. The right answer?</p><button class="qo">Yes, it is a hard security boundary</button><button class="qo" data-ok>No, it helps but is not a security boundary</button><button class="qo">Only in the CLI</button></div>
+    <div class="q" data-why="For preToolUse, exit code 2 means deny. A crash or other non-zero exit also fails closed, but a timeout fails open."><p>8. A <code>preToolUse</code> command hook exits with code 2. What does Copilot do with the tool call?</p><button class="qo">Logs a warning and runs it</button><button class="qo" data-ok>Denies it</button><button class="qo">Retries the hook</button></div>
+    <div class="q" data-why="Shift+Tab cycles the CLI between standard, plan and autopilot modes."><p>9. In the Copilot CLI, how do you switch to plan mode during a session?</p><button class="qo">Ctrl+P</button><button class="qo" data-ok>Shift+Tab</button><button class="qo">Restart with --model plan</button></div>
+    <div class="q" data-why="Characterization tests pin today's behaviour, so the refactor can prove it changed nothing. Fixes and upgrades come in separate PRs."><p>10. First step before refactoring Ledgerly's 600-line <code>invoices/views.py</code>?</p><button class="qo">Ask the agent to rewrite it in one pass</button><button class="qo">Upgrade Django first</button><button class="qo" data-ok>Add characterization tests that pass on the current code</button></div>
+  </div>
+
+  <h2 class="sec">Where to go next</h2>
+  <div class="grid">
+    <a class="tile" href="Copilot_Onboarding_Kit.html"><div class="em">🧰</div><h3>Onboarding Kit</h3><p>First-week checklist, prompt cheat sheet, review checklist and rollout steps.</p></a>
+    <a class="tile" href="Copilot_Sim_Greenfield.html"><div class="em">🌱</div><h3>Greenfield simulator</h3><p>Build ShipTrack step by step with Copilot.</p></a>
+    <a class="tile" href="Copilot_Sim_Brownfield.html"><div class="em">🏚️</div><h3>Brownfield simulator</h3><p>Take on Ledgerly safely.</p></a>
+    <a class="tile" href="Copilot_FAQ.html"><div class="em">❓</div><h3>FAQ</h3><p>Short answers to common questions.</p></a>
+  </div>
+</div>
+<script src="assets/copilot-sim.js?v=1"></script>
+<script src="assets/copilot-kit.js?v=1"></script>
+<script>
+(function () {
+  function bars() {
+    document.querySelectorAll('.meter[data-track]').forEach(function (m) {
+      var list = document.querySelector('.track[data-key="' + m.dataset.track + '"]');
+      if (!list || !m.firstElementChild) return;
+      var all = list.querySelectorAll('li').length;
+      var done = list.querySelectorAll('li.ok').length;
+      m.firstElementChild.style.width = (all ? Math.round(done * 100 / all) : 0) + '%';
+    });
+  }
+  document.addEventListener('click', bars);
+  document.addEventListener('keyup', bars);
+  bars();
+})();
+</script>
+</body>
+</html>

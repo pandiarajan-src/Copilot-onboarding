@@ -1,0 +1,369 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>2 · GitHub Copilot Feature Tour</title>
+<meta name="description" content="A guided tour of GitHub Copilot in VS Code and the Copilot CLI: inline and next edit suggestions, chat agents, agent mode, CLI modes, slash commands and context, custom instructions, models, code review and the cloud agent, with a cheat-sheet.">
+<link rel="stylesheet" href="assets/copilot-sim.css?v=1">
+<link rel="stylesheet" href="assets/copilot-kit.css?v=1">
+</head>
+<body>
+<header class="sim-header">
+  <div class="icon">✨</div>
+  <div>
+    <h1>2 · Feature Tour</h1>
+    <p>Every Copilot feature you will use day to day in VS Code and the CLI, one per step, shown on the ShipTrack repo.</p>
+    <div class="stack-pills"><span class="pill">Updated November 2026</span><span class="pill">VS Code · Copilot harness</span><span class="pill">Copilot CLI</span><span class="pill">ShipTrack · FastAPI</span><span class="pill">~20 min</span></div>
+  </div>
+  <a class="home-link" href="index.html">⌂ All guides</a>
+</header>
+<div class="sim-body">
+  <nav class="sidebar" id="steps-nav" aria-label="Steps"></nav>
+  <main class="main-area">
+    <div class="progress-bar-container">
+      <div class="progress-bar-outer"><div class="progress-bar-inner" id="progress"></div></div>
+      <div class="progress-label" id="progress-label">Step 1</div>
+    </div>
+    <div class="step-content-area">
+
+<!-- 1 -->
+<section class="step-panel" data-section="In the editor" data-title="Inline &amp; next edit suggestions" data-sub="While you type">
+  <div class="step-header"><div class="phase-tag">✍️ Editor</div><h2>Suggestions as you type</h2><p>Two features work without opening chat. <strong>Inline suggestions</strong> complete what you are typing. <strong>Next edit suggestions</strong> predict the follow-up edit your change implies, even somewhere else in the file.</p></div>
+
+  <h3 class="subsection">Inline suggestion</h3>
+  <p class="body">Priya types a function signature and a docstring. Copilot proposes the body as dimmed "ghost text". She reads it, then accepts it with <kbd>Tab</kbd> or keeps typing to ignore it.</p>
+  <div class="doc"><div class="doc-bar">app/routers/shipments.py<span class="state">suggestion shown</span></div><div class="doc-body"><span class="md-k">@router.get</span>(<span class="md-s">"/shipments/{shipment_id}"</span>, response_model=ShipmentOut)
+<span class="md-k">def</span> get_shipment(shipment_id: int, db: Session = Depends(get_db)):
+    <span class="md-s">"""Return one shipment or 404."""</span>
+<span class="md-c">    shipment = db.get(Shipment, shipment_id)
+    if shipment is None:
+        raise HTTPException(status_code=404, detail="Shipment not found")
+    return shipment</span></div></div>
+
+  <h3 class="subsection">Next edit suggestion</h3>
+  <p class="body">She renames the parameter <code>shipment_id</code> to <code>id_</code> on one line. Copilot highlights the other lines that still use the old name and offers the matching edit, so she can step through them instead of hunting.</p>
+  <div class="flow"><span class="node done">You edit line 2</span><span class="arrow">→</span><span class="node on">Copilot suggests the edit on line 4</span><span class="arrow">→</span><span class="node">Accept or skip</span><span class="arrow">→</span><span class="node">Next related edit</span></div>
+
+  <div class="callout info"><div class="icon">ℹ️</div><p>Custom instructions do <strong>not</strong> affect inline suggestions. Good names, docstrings and nearby code are what steer them.</p></div>
+</section>
+
+<!-- 2 -->
+<section class="step-panel" data-section="In the editor" data-title="Chat &amp; built-in agents" data-sub="Ask · Agent · Plan">
+  <div class="step-header"><div class="phase-tag purple">💬 Chat</div><h2>One chat, three built-in agents</h2><p>The Chat view sits beside your code. Pick the built-in agent that matches what you want: an answer, a change, or a plan.</p></div>
+
+  <div class="tbl-wrap"><table class="tbl">
+    <tr><th>Agent</th><th>What it does</th><th>Changes files?</th><th>Use it when</th></tr>
+    <tr><td><strong>Ask</strong></td><td>Answers questions about code and concepts</td><td class="n">No (read-only)</td><td>Leo wants to understand how <code>invoices/views.py</code> works</td></tr>
+    <tr><td><strong>Agent</strong></td><td>Plans, edits files, runs tools and commands, iterates</td><td class="y">Yes</td><td>Priya wants a new endpoint with tests</td></tr>
+    <tr><td><strong>Plan</strong></td><td>Produces a step-by-step plan before any code changes; also via <code>/plan</code></td><td class="n">No (plans only)</td><td>Marco wants to agree an approach for the Ledgerly refactor first</td></tr>
+  </table></div>
+
+  <div class="callout tip"><div class="icon">💡</div><p><strong>Autopilot is not a separate agent.</strong> It is a permission and continuation setting that lets an agent keep going and auto-approve tools. See step 3 before you turn it on.</p></div>
+
+  <h3 class="subsection">Session target (harness)</h3>
+  <p class="body">A dropdown picks which harness runs the session. <strong>Copilot</strong> is the default and the one this hub uses. <strong>Claude</strong> and <strong>Codex</strong> are also offered (they may need settings or a specific plan, and your enterprise can disable them). <strong>Local</strong> is deprecated and scheduled for removal by February 2027. Sessions keep running in the background even if you switch windows.</p>
+  <div class="callout warn"><div class="icon">⚠️</div><p>Older tutorials show an "Edit" mode and prompt files. Current docs describe Ask, Agent and Plan; prompt files work only in the deprecated Local harness. Prefer <strong>skills</strong> for reusable prompts.</p></div>
+</section>
+
+<!-- 3 -->
+<section class="step-panel" data-section="In the editor" data-title="Agent mode in VS Code" data-sub="Tools, approvals, worktrees">
+  <div class="step-header"><div class="phase-tag green">🛠️ Agent</div><h2>Let the agent do the mechanics, keep the approvals</h2><p>In Agent mode Copilot reads files, edits code and asks to run commands. You approve tool calls according to your permission level.</p></div>
+
+  <div class="chat reveal">
+    <div class="chat-header copilot">🤖 VS Code · Copilot Chat <span class="tag">Agent · shiptrack</span></div>
+    <div class="chat-body">
+      <div class="msg user"><div class="who">Priya</div><div class="bubble">Implement <code>GET /shipments/{id}/events</code> returning events newest first. Follow our instructions file. Add tests and run them.</div></div>
+      <div class="msg ai"><div class="who">Copilot</div><div class="bubble">Plan:<ol><li>Add <code>TrackingEventOut</code> to <code>app/schemas.py</code></li><li>Add the route in <code>app/routers/shipments.py</code>, 404 if the shipment is missing</li><li>Add tests in <code>tests/test_events.py</code></li><li>Run <code>ruff check .</code> and <code>pytest -q</code></li></ol></div></div>
+      <div class="msg hook"><div class="who">Tool</div><div class="bubble">edit app/schemas.py (+9) · app/routers/shipments.py (+18) · tests/test_events.py (+41)</div></div>
+      <div class="msg hook"><div class="who">Tool</div><div class="bubble">Run in terminal: ruff check . &amp;&amp; pytest -q
+[Allow] [Allow in this session] [Skip]</div></div>
+      <div class="msg hook"><div class="who">Tool</div><div class="bubble">All checks passed! · 11 passed in 0.62s</div></div>
+      <div class="msg ai"><div class="who">Copilot</div><div class="bubble">Done. Three files changed. Review the ordering in the query: I used <code>order_by(TrackingEvent.occurred_at.desc())</code>.</div></div>
+    </div>
+  </div>
+
+  <h3 class="subsection">Permission levels</h3>
+  <div class="tbl-wrap"><table class="tbl">
+    <tr><th>Level</th><th>Behaviour</th></tr>
+    <tr><td><strong>Manual</strong> (default)</td><td>You confirm tool calls that need approval.</td></tr>
+    <tr><td><strong>Assisted</strong></td><td>A model-based safety check decides routine approvals and escalates risky ones.</td></tr>
+    <tr><td><strong>Allow all</strong></td><td>No prompts. Use only in isolated sessions.</td></tr>
+  </table></div>
+  <p class="body">Set the default with <code>chat.permissions.default</code>; review saved approvals with <strong>Chat: Manage Tool Approval</strong> in the Command Palette.</p>
+
+  <h3 class="subsection">Run agents in parallel</h3>
+  <p class="body">The <strong>Agents window</strong> coordinates several sessions. For each one choose <strong>Branch</strong> (works in the current folder) or <strong>New Worktree</strong> (a separate checkout). Worktree sessions always run with Allow all, and git-ignored files such as <code>.env</code> or installed dependencies are not copied into a new worktree.</p>
+  <div class="callout warn"><div class="icon">⚠️</div><p>Worktrees isolate <strong>files</strong> only. The agent still has your machine and network access. Pair them with sandboxing; see <a href="Copilot_Sim_Security.html">Security</a>.</p></div>
+</section>
+
+<!-- 4 -->
+<section class="step-panel" data-section="In the terminal" data-title="Copilot CLI" data-sub="Interactive + programmatic">
+  <div class="step-header"><div class="phase-tag teal">⌨️ CLI</div><h2>The same agent in your terminal</h2><p>The Copilot CLI is an agent that runs in any terminal, local or remote. Use it interactively, or script it with a single prompt.</p></div>
+
+  <div data-tabs>
+    <div class="tabs">
+      <button class="tab-btn on" data-tab="int">Interactive</button>
+      <button class="tab-btn" data-tab="prog">Programmatic (-p)</button>
+    </div>
+    <div class="tab-pane on" data-pane="int">
+      <div class="terminal typer">
+        <div class="terminal-header"><div class="terminal-dots"><div class="dot dot-r"></div><div class="dot dot-y"></div><div class="dot dot-g"></div></div><div class="terminal-title">bash — shiptrack</div><button class="run-btn">▶ Run</button></div>
+        <div class="terminal-body">
+<span class="l"><span class="t-prompt">marco@nw:~/shiptrack$</span> <span class="t-cmd">copilot</span></span>
+<span class="l t-info" data-wait="500">● Copilot CLI · mode: standard · Shift+Tab to change</span>
+<span class="l"><span class="t-prompt">&gt;</span> <span class="t-cmd">Explain how @app/routers/shipments.py validates input</span></span>
+<span class="l t-output" data-wait="700">Requests are parsed into Pydantic v2 models (ShipmentCreate). FastAPI returns 422</span>
+<span class="l t-output">on validation errors before the handler runs. Weight is constrained with gt=0.</span>
+<span class="l"><span class="t-prompt">&gt;</span> <span class="t-cmd">!git status --short</span></span>
+<span class="l t-output"> M app/routers/shipments.py</span>
+<span class="l"><span class="t-comment"># Shift+Tab → plan mode</span></span>
+<span class="l"><span class="t-prompt">plan&gt;</span> <span class="t-cmd">Add pagination to GET /shipments/{id}/events</span></span>
+<span class="l t-purple" data-wait="700">Plan: 1) add limit/offset query params 2) update query 3) tests for page 1 and 2</span>
+<span class="l t-warn">Copilot wants to edit app/routers/shipments.py  [once] [session] [always for this repo] [deny]</span>
+        </div>
+      </div>
+      <ul class="body">
+        <li><strong>Modes</strong>: standard, plan and autopilot. Cycle with <kbd>Shift</kbd>+<kbd>Tab</kbd>, or start with <code>--mode</code>, <code>--plan</code> or <code>--autopilot</code> <span class="badge-new">experimental</span>.</li>
+        <li><strong>Start with a prompt and stay</strong>: <code>copilot -i "…"</code>.</li>
+        <li><strong>Pick up later</strong>: <code>/resume</code>, or launch with <code>--continue</code> / <code>--resume</code>.</li>
+      </ul>
+    </div>
+    <div class="tab-pane" data-pane="prog">
+      <div class="terminal typer">
+        <div class="terminal-header"><div class="terminal-dots"><div class="dot dot-r"></div><div class="dot dot-y"></div><div class="dot dot-g"></div></div><div class="terminal-title">bash — shiptrack (CI job)</div><button class="run-btn">▶ Run</button></div>
+        <div class="terminal-body">
+<span class="l"><span class="t-comment"># one prompt, print only the answer, then exit</span></span>
+<span class="l"><span class="t-prompt">$</span> <span class="t-cmd">copilot -p "List endpoints without tests" -s</span></span>
+<span class="l t-output" data-wait="700">POST /shipments/{id}/events</span>
+<span class="l"><span class="t-comment"># machine-readable output (JSONL) for scripts</span></span>
+<span class="l"><span class="t-prompt">$</span> <span class="t-cmd">copilot -p "Summarise ruff findings" --output-format=json</span></span>
+<span class="l t-output" data-wait="500">{"type":"…", …}</span>
+<span class="l"><span class="t-comment"># allow git reads, block pushes, for this run only</span></span>
+<span class="l"><span class="t-prompt">$</span> <span class="t-cmd">copilot -p "Draft release notes from recent commits" \</span></span>
+<span class="l"><span class="t-cmd">    --allow-tool='shell(git:*)' --deny-tool='shell(git push)'</span></span>
+<span class="l"><span class="t-prompt">$</span> <span class="t-cmd">git diff main | copilot -p "Review this diff for missing tests"</span></span>
+        </div>
+      </div>
+      <p class="body">Deny rules always win over allow rules, even with <code>--allow-all</code>. Repo hooks, workspace MCP and extensions are not loaded in <code>-p</code> mode unless you opt in with the matching <code>GITHUB_COPILOT_PROMPT_MODE_*</code> variables.</p>
+    </div>
+  </div>
+  <p class="body">Output is illustrative. Install and sign-in are covered in <a href="Copilot_Sim_Setup.html">Setup</a>.</p>
+</section>
+
+<!-- 5 -->
+<section class="step-panel" data-section="In the terminal" data-title="Slash commands &amp; context" data-sub="/ · # · @">
+  <div class="step-header"><div class="phase-tag amber">🧭 Commands</div><h2>Steer with slash commands and explicit context</h2><p>Slash commands trigger built-in actions. Context markers point Copilot at exactly the files, issues or output you mean.</p></div>
+
+  <div data-tabs>
+    <div class="tabs">
+      <button class="tab-btn on" data-tab="cli">Copilot CLI</button>
+      <button class="tab-btn" data-tab="vsc">VS Code Chat</button>
+    </div>
+    <div class="tab-pane on" data-pane="cli">
+      <div class="tbl-wrap"><table class="tbl">
+        <tr><th>Type</th><th>Meaning</th><th>Example</th></tr>
+        <tr><td><code>@FILE</code></td><td>Attach a file to the prompt</td><td><code>Refactor @app/models.py to use mapped_column</code></td></tr>
+        <tr><td><code>#NUMBER</code></td><td>Reference an issue or PR</td><td><code>Implement #42</code></td></tr>
+        <tr><td><code>!CMD</code></td><td>Run a shell command directly</td><td><code>!pytest -q</code></td></tr>
+      </table></div>
+      <div class="tbl-wrap"><table class="tbl">
+        <tr><th>Command</th><th>Does</th></tr>
+        <tr><td><code>/plan</code> · <code>/autopilot</code></td><td>Switch to planning or autonomous mode</td></tr>
+        <tr><td><code>/model</code></td><td>Choose the model</td></tr>
+        <tr><td><code>/context</code> · <code>/compact</code> · <code>/clear</code></td><td>See, shrink or reset the conversation context</td></tr>
+        <tr><td><code>/add-dir PATH</code></td><td>Trust and add another directory</td></tr>
+        <tr><td><code>/init</code> · <code>/instructions</code></td><td>Generate instructions; toggle which instruction files load</td></tr>
+        <tr><td><code>/review</code> · <code>/security-review</code></td><td>Review changes without editing code</td></tr>
+        <tr><td><code>/delegate</code></td><td>Hand the task to the cloud agent (opens a PR)</td></tr>
+        <tr><td><code>/undo</code> · <code>/diff</code> <span class="badge-new">experimental</span></td><td>Rewind a change; show the session diff</td></tr>
+        <tr><td><code>/permissions</code> · <code>/usage</code> · <code>/help</code></td><td>Approval mode, credit usage, everything else</td></tr>
+      </table></div>
+    </div>
+    <div class="tab-pane" data-pane="vsc">
+      <div class="tbl-wrap"><table class="tbl">
+        <tr><th>Type</th><th>Does</th></tr>
+        <tr><td><code>/plan</code></td><td>Ask the Plan agent for a plan before any edits</td></tr>
+        <tr><td><code>/&lt;skill-name&gt;</code></td><td>Run a skill from <code>.github/skills/</code> (skills appear as slash commands)</td></tr>
+        <tr><td><code>/hooks</code></td><td>Open the hooks UI</td></tr>
+        <tr><td><code>/autoApprove</code> · <code>/disableAutoApprove</code></td><td>Turn tool auto-approval on or off for the session (also <code>/yolo</code> · <code>/disableYolo</code>)</td></tr>
+        <tr><td><code>#</code> references</td><td>Attach context such as files to your prompt</td></tr>
+      </table></div>
+      <div class="callout warn"><div class="icon">⚠️</div><p><strong>Check current docs for the full list.</strong> Older guides list chat commands such as <code>/explain</code>, <code>/fix</code> and <code>/tests</code>, plus <code>#</code> variables and <code>@</code> participants. Their current set depends on your VS Code build and harness. Type <code>/</code> or <code>#</code> in the chat input to see what your build offers.</p></div>
+    </div>
+  </div>
+</section>
+
+<!-- 6 -->
+<section class="step-panel" data-section="Make it yours" data-title="Custom instructions" data-sub="Teach your conventions">
+  <div class="step-header"><div class="phase-tag purple">📌 Instructions</div><h2>Write your conventions down once</h2><p>Instruction files are added to every chat and agent request in the repo. They are the single biggest lever on output quality. Both VS Code and the CLI read them.</p></div>
+
+  <div class="filetree"><div class="ft-header">Where instructions live</div><pre><span class="ft-folder">shiptrack/</span>
+├── <span class="ft-file">AGENTS.md</span>                              <span class="ft-note"># cross-tool; nested files supported</span>
+└── <span class="ft-folder">.github/</span>
+    ├── <span class="ft-new">copilot-instructions.md</span>            <span class="ft-note"># repo-wide</span>
+    └── <span class="ft-folder">instructions/</span>
+        └── <span class="ft-new">tests.instructions.md</span>          <span class="ft-note"># scoped with applyTo</span>
+<span class="ft-folder">~/.copilot/</span><span class="ft-file">copilot-instructions.md</span>       <span class="ft-note"># personal, all repos</span></pre></div>
+
+  <div class="doc"><div class="doc-bar">.github/copilot-instructions.md<span class="state">saved</span></div><div class="doc-body"><span class="md-h"># ShipTrack conventions</span>
+
+<span class="md-h">## Stack</span>
+- Python 3.12, FastAPI, Pydantic v2, SQLAlchemy 2 (2.0-style <span class="md-k">select()</span>), Alembic
+- PostgreSQL in all environments; no SQLite shortcuts
+
+<span class="md-h">## Code</span>
+- One router per resource in <span class="md-k">app/routers/</span>
+- Missing records: raise <span class="md-k">HTTPException(status_code=404)</span>
+- Never build SQL with f-strings
+
+<span class="md-h">## Checks before you finish</span>
+- <span class="md-k">ruff check .</span>
+- <span class="md-k">pytest -q</span></div></div>
+
+  <div class="doc"><div class="doc-bar">.github/instructions/tests.instructions.md<span class="state">saved</span></div><div class="doc-body"><span class="md-c">---</span>
+<span class="md-k">name</span>: tests
+<span class="md-k">description</span>: How we write API tests
+<span class="md-k">applyTo</span>: <span class="md-s">"tests/**"</span>
+<span class="md-c">---</span>
+- Use httpx with the FastAPI app, not a running server
+- One happy path and at least two error cases per endpoint</div></div>
+
+  <div class="callout tip"><div class="icon">💡</div><p>No file yet? In the CLI run <code>/init</code> (or <code>copilot init</code>) to generate a first draft, then edit it with your team. <code>copilot instruction list</code> shows which files are loaded. Deeper coverage in <a href="Copilot_Sim_Knowledge.html">Knowledge</a> and <a href="Copilot_Sim_Customize.html">Customize</a>.</p></div>
+</section>
+
+<!-- 7 -->
+<section class="step-panel" data-section="Make it yours" data-title="Models" data-sub="Picker · Auto · cost">
+  <div class="step-header"><div class="phase-tag teal">🧠 Models</div><h2>Choose a model, or let Auto choose</h2><p>Copilot offers models from several providers. Bigger models can reason better on hard tasks but consume more AI Credits.</p></div>
+
+  <div data-tabs>
+    <div class="tabs">
+      <button class="tab-btn on" data-tab="v">VS Code</button>
+      <button class="tab-btn" data-tab="c">Copilot CLI</button>
+    </div>
+    <div class="tab-pane on" data-pane="v">
+      <p class="body">Open the <strong>model picker</strong> in the Chat input and choose a model, or <strong>Auto</strong> to let Copilot pick. A custom agent can pin its own model in its frontmatter (<code>model:</code>).</p>
+    </div>
+    <div class="tab-pane" data-pane="c">
+      <div class="terminal">
+        <div class="terminal-header"><div class="terminal-dots"><div class="dot dot-r"></div><div class="dot dot-y"></div><div class="dot dot-g"></div></div><div class="terminal-title">bash — shiptrack</div></div>
+        <div class="terminal-body">
+<span class="l"><span class="t-comment"># in a session: pick from the current list</span></span>
+<span class="l"><span class="t-prompt">&gt;</span> <span class="t-cmd">/model</span></span>
+<span class="l"><span class="t-comment"># save the choice for this repo only</span></span>
+<span class="l"><span class="t-prompt">&gt;</span> <span class="t-cmd">/model --repo</span></span>
+<span class="l"><span class="t-comment"># at launch</span></span>
+<span class="l"><span class="t-prompt">$</span> <span class="t-cmd">copilot --model auto</span></span>
+<span class="l"><span class="t-prompt">$</span> <span class="t-cmd">COPILOT_MODEL=&lt;model-id&gt; copilot -p "…"</span></span>
+        </div>
+      </div>
+      <p class="body"><code>/model</code> can save to <code>--session</code>, <code>--global</code>, <code>--repo</code> or <code>--local</code>. <code>--effort</code> sets reasoning effort where the model supports it.</p>
+    </div>
+  </div>
+
+  <ul class="check-list">
+    <li class="ok"><span class="ci">✓</span><div><strong>Start with Auto</strong> and switch only when a task clearly needs more reasoning.</div></li>
+    <li class="ok"><span class="ci">✓</span><div><strong>Free plan</strong> users get Auto only.</div></li>
+    <li><span class="ci">!</span><div><strong>The model list changes often</strong> and your org may restrict it. Check the picker, not a blog post.</div></li>
+    <li><span class="ci">!</span><div><strong>BYOK</strong> (bring your own key) adds chat models, but does not replace the Copilot service for inline suggestions.</div></li>
+  </ul>
+</section>
+
+<!-- 8 -->
+<section class="step-panel" data-section="Team &amp; cloud" data-title="Code review &amp; PRs" data-sub="Review before humans do">
+  <div class="step-header"><div class="phase-tag coral">🔍 Review</div><h2>A first review pass, not the last one</h2><p>Copilot can review a diff or a pull request and leave comments. Marco uses it to catch the obvious issues so human review can focus on design.</p></div>
+
+  <div class="cards">
+    <div class="card blue"><h4>On github.com</h4><p>Request <strong>Copilot</strong> as a reviewer on a pull request. It comments like any other reviewer; you decide what to apply.</p></div>
+    <div class="card teal"><h4>In the CLI</h4><p><code>/review</code> runs the code-review agent, which does not modify code. <code>/security-review</code> focuses on security. <code>/pr</code> views, creates or fixes a PR.</p></div>
+    <div class="card purple"><h4>In VS Code</h4><p>Review a selection from the editor. Steer it with <code>github.copilot.chat.reviewSelection.instructions</code>.</p></div>
+  </div>
+
+  <div class="chat reveal">
+    <div class="chat-header cli">⌨️ Copilot CLI <span class="tag">standard · shiptrack</span></div>
+    <div class="chat-body">
+      <div class="msg user"><div class="who">Marco</div><div class="bubble">/review</div></div>
+      <div class="msg ai"><div class="who">Copilot</div><div class="bubble">3 findings on the current changes:<ol><li><code>app/routers/shipments.py</code>: <code>limit</code> has no upper bound, so one request can load every event.</li><li><code>tests/test_events.py</code>: no test for an unknown shipment id.</li><li>Minor: unused import <code>datetime</code>.</li></ol></div></div>
+      <div class="msg user"><div class="who">Marco</div><div class="bubble">Cap limit at 100 and add the missing test.</div></div>
+    </div>
+  </div>
+
+  <div class="callout warn"><div class="icon">⚠️</div><p><strong>Check current docs</strong> for PR-side configuration, such as automatic reviews and how instruction files influence review comments. Commit message and PR description instruction settings exist in VS Code but are <span class="badge-new">experimental</span>.</p></div>
+</section>
+
+<!-- 9 -->
+<section class="step-panel" data-section="Team &amp; cloud" data-title="Cloud agent" data-sub="Task in, PR out">
+  <div class="step-header"><div class="phase-tag green">☁️ Cloud agent</div><h2>Hand a task off and get a pull request back</h2><p>The cloud agent works on GitHub's infrastructure, not your machine. You give it a task; it works in its own environment and opens a pull request for you to review.</p></div>
+
+  <div class="flow"><span class="node done">Start the task</span><span class="arrow">→</span><span class="node done">Ephemeral Linux environment</span><span class="arrow">→</span><span class="node on">Agent edits, builds, tests</span><span class="arrow">→</span><span class="node">Pull request</span><span class="arrow">→</span><span class="node">You review &amp; merge</span></div>
+
+  <h3 class="subsection">Three ways to start</h3>
+  <div class="tbl-wrap"><table class="tbl">
+    <tr><th>From</th><th>How</th></tr>
+    <tr><td>github.com</td><td>Assign or start a task for Copilot on the repo</td></tr>
+    <tr><td>VS Code</td><td>Choose the cloud session target for a new session</td></tr>
+    <tr><td>Copilot CLI</td><td><code>/delegate</code> with an optional prompt; <kbd>Ctrl</kbd>+<kbd>E</kbd> picks local or cloud before the conversation starts</td></tr>
+  </table></div>
+
+  <div class="terminal typer">
+    <div class="terminal-header"><div class="terminal-dots"><div class="dot dot-r"></div><div class="dot dot-y"></div><div class="dot dot-g"></div></div><div class="terminal-title">copilot — shiptrack</div><button class="run-btn">▶ Run</button></div>
+    <div class="terminal-body">
+<span class="l"><span class="t-prompt">&gt;</span> <span class="t-cmd">/delegate Add OpenAPI examples to every ShipTrack endpoint</span></span>
+<span class="l t-info" data-wait="800">Task handed to the cloud agent.</span>
+<span class="l t-output">It will open a pull request on northwind/shiptrack when done.</span>
+    </div>
+  </div>
+
+  <ul class="check-list">
+    <li class="ok"><span class="ci">✓</span><div><strong>Paid plan required.</strong></div></li>
+    <li class="ok"><span class="ci">✓</span><div><strong>Firewalled by default</strong>: outbound access is limited to GitHub and Copilot hosts unless allowed.</div></li>
+    <li class="ok"><span class="ci">✓</span><div><strong>Non-interactive</strong>: tools are pre-granted, so it cannot stop to ask you. Hooks in <code>.github/hooks/*.json</code> still apply.</div></li>
+    <li><span class="ci">!</span><div><strong>Write the task like a ticket</strong>: goal, acceptance criteria, files involved. Vague tasks produce vague PRs.</div></li>
+  </ul>
+</section>
+
+<!-- 10 -->
+<section class="step-panel" data-section="Wrap-up" data-title="Cheat-sheet" data-sub="One table to keep">
+  <div class="step-header"><div class="phase-tag teal">📋 Cheat-sheet</div><h2>The features at a glance</h2><p>Keep this open for your first week.</p></div>
+  <div class="tbl-wrap"><table class="tbl">
+    <tr><th>I want to…</th><th>VS Code</th><th>Copilot CLI</th></tr>
+    <tr><td>Finish the line I'm typing</td><td>Inline suggestion, <kbd>Tab</kbd> to accept</td><td class="n">n/a</td></tr>
+    <tr><td>Apply the follow-up edit</td><td>Next edit suggestion</td><td class="n">n/a</td></tr>
+    <tr><td>Ask about code, change nothing</td><td>Ask agent</td><td>Ask in standard mode</td></tr>
+    <tr><td>Agree a plan first</td><td>Plan agent or <code>/plan</code></td><td><kbd>Shift</kbd>+<kbd>Tab</kbd> to plan, or <code>/plan</code></td></tr>
+    <tr><td>Make a multi-file change</td><td>Agent</td><td><code>copilot</code> (standard mode)</td></tr>
+    <tr><td>Attach a file</td><td><code>#</code> references</td><td><code>@path/to/file</code></td></tr>
+    <tr><td>Run one prompt in a script</td><td class="n">n/a</td><td><code>copilot -p "…" -s</code></td></tr>
+    <tr><td>Switch model</td><td>Model picker</td><td><code>/model</code> or <code>--model</code></td></tr>
+    <tr><td>Teach conventions</td><td colspan="2"><code>.github/copilot-instructions.md</code>, <code>AGENTS.md</code>, <code>.github/instructions/*.instructions.md</code></td></tr>
+    <tr><td>Generate an instructions draft</td><td class="n">n/a</td><td><code>/init</code></td></tr>
+    <tr><td>Review changes</td><td>Review selection</td><td><code>/review</code> · <code>/security-review</code></td></tr>
+    <tr><td>Run agents in parallel</td><td>Agents window (Branch / New Worktree)</td><td><code>/new worktree</code> · <code>/fleet</code></td></tr>
+    <tr><td>Hand off to the cloud</td><td>Cloud session target</td><td><code>/delegate</code></td></tr>
+    <tr><td>Control tool approvals</td><td><code>chat.permissions.default</code></td><td><code>/permissions</code> · <code>--allow-tool</code> · <code>--deny-tool</code></td></tr>
+    <tr><td>Check usage</td><td>Account / billing pages</td><td><code>/usage</code> · <code>/limits</code></td></tr>
+  </table></div>
+  <div class="callout info"><div class="icon">ℹ️</div><p>Copilot ships changes often. When a screen differs from this table, the <a href="https://code.visualstudio.com/docs/agents/overview">VS Code agents docs</a> and the <a href="https://docs.github.com/en/copilot/reference/copilot-cli-reference/cli-command-reference">CLI command reference</a> win.</p></div>
+</section>
+
+<!-- 11 -->
+<section class="step-panel" data-section="Wrap-up" data-title="Where to go next" data-sub="Set up and build">
+  <div class="step-header"><div class="phase-tag green">🗺️ Next</div><h2>From tour to hands-on</h2><p>You have seen the features. Now install them and use them on a real repo.</p></div>
+  <div class="cards">
+    <a class="card green" href="Copilot_Sim_Setup.html" style="text-decoration:none;color:inherit"><h4>⚙️ 3 · Setup</h4><p>Install, sign in and verify VS Code and the CLI.</p></a>
+    <a class="card purple" href="Copilot_Sim_Customize.html" style="text-decoration:none;color:inherit"><h4>🧩 4 · Customize</h4><p>Skills, agents, tools, hooks and MCP.</p></a>
+    <a class="card coral" href="Copilot_Sim_Security.html" style="text-decoration:none;color:inherit"><h4>🛡️ 5 · Security</h4><p>Approvals, sandboxing and worktrees in depth.</p></a>
+    <a class="card teal" href="Copilot_Sim_Greenfield.html" style="text-decoration:none;color:inherit"><h4>🌱 6 · Greenfield</h4><p>Build ShipTrack end to end.</p></a>
+    <a class="card amber" href="Copilot_Sim_Brownfield.html" style="text-decoration:none;color:inherit"><h4>🏢 7 · Brownfield</h4><p>Work safely in Ledgerly.</p></a>
+    <a class="card blue" href="Copilot_VSCode_vs_CLI.html" style="text-decoration:none;color:inherit"><h4>⚖️ 9 · VS Code vs CLI</h4><p>Which surface fits which task.</p></a>
+    <a class="card" href="Copilot_Onboarding_Kit.html" style="text-decoration:none;color:inherit"><h4>🧰 Onboarding Kit</h4><p>Checklists and a prompt cheat-sheet.</p></a>
+  </div>
+</section>
+
+    </div>
+  </main>
+</div>
+<script src="assets/copilot-sim.js?v=1"></script>
+<script src="assets/copilot-kit.js?v=1"></script>
+</body>
+</html>

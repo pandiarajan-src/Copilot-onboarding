@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>GitHub Copilot Onboarding Hub</title>
+<meta name="description" content="Step-by-step guides and interactive simulators that teach professional developers GitHub Copilot in VS Code and the Copilot CLI: setup, features, customization, security, greenfield and brownfield workflows.">
+<link rel="stylesheet" href="assets/copilot-sim.css?v=1">
+<link rel="stylesheet" href="assets/copilot-kit.css?v=1">
+<style>
+div.path{display:flex;gap:6px;flex-wrap:wrap;margin:10px 0 4px;}
+div.path a{background:var(--bg3);border:1px solid var(--border2);border-radius:8px;padding:5px 11px;font-size:12.5px;color:var(--white);text-decoration:none;}
+div.path a:hover{border-color:var(--blue);}
+div.path span{color:var(--dim);align-self:center;font-size:12px;}
+</style>
+</head>
+<body>
+<header class="sim-header">
+  <div class="icon">🤖</div>
+  <div>
+    <h1>GitHub Copilot Onboarding Hub</h1>
+    <p>Clutter-free, step-by-step guides and hands-on simulators that take a professional developer from first install to agent-driven greenfield and brownfield work with GitHub Copilot in VS Code and the Copilot CLI.</p>
+    <div class="stack-pills"><span class="pill">Updated November 2026</span><span class="pill">VS Code · Copilot Chat &amp; agents</span><span class="pill">GitHub Copilot CLI</span><span class="pill">Windows · macOS · Linux</span><span class="pill">Python · FastAPI · Django</span></div>
+  </div>
+</header>
+<div class="wrap">
+  <div class="callout info"><div class="icon">ℹ️</div><p><strong>New here?</strong> Read the <a href="Copilot_Intro.html">Introduction</a> and the <a href="Copilot_Feature_Tour.html">Feature Tour</a>, do <a href="Copilot_Sim_Setup.html">Setup</a>, then build something in the <a href="Copilot_Sim_Greenfield.html">Greenfield</a> run. <strong>Joining an existing codebase?</strong> Go straight to <a href="Copilot_Sim_Brownfield.html">Brownfield</a> after Setup.</p></div>
+
+  <h2 class="sec">Recommended path</h2>
+  <div class="path">
+    <a href="Copilot_Intro.html">1 Intro</a><span>→</span>
+    <a href="Copilot_Feature_Tour.html">2 Features</a><span>→</span>
+    <a href="Copilot_Sim_Setup.html">3 Setup</a><span>→</span>
+    <a href="Copilot_Sim_Customize.html">4 Skills · Agents · Tools · Hooks · MCP</a><span>→</span>
+    <a href="Copilot_Sim_Security.html">5 Security</a><span>→</span>
+    <a href="Copilot_Sim_Greenfield.html">6 Greenfield</a><span>→</span>
+    <a href="Copilot_Sim_Brownfield.html">7 Brownfield</a><span>→</span>
+    <a href="Copilot_Sim_Knowledge.html">8 Knowledge</a><span>→</span>
+    <a href="Copilot_VSCode_vs_CLI.html">9 VS Code vs CLI</a><span>→</span>
+    <a href="Copilot_FAQ.html">10 FAQ</a>
+  </div>
+
+  <h2 class="sec">Learn the basics</h2>
+  <div class="grid">
+    <a class="tile" href="Copilot_Intro.html"><div class="em">👋</div><h3>1 · Introduction</h3><p>What Copilot is, how it works, plans and models, benefits and limits, and the mental model from completions to agents.</p><span class="tag new">start here</span></a>
+    <a class="tile" href="Copilot_Feature_Tour.html"><div class="em">✨</div><h3>2 · Feature Tour</h3><p>Completions, next edit suggestions, chat, agents, slash commands, context, code review and the CLI, with a cheat-sheet.</p><span class="tag new">new</span></a>
+    <a class="tile" href="Copilot_Sim_Setup.html"><div class="em">⚙️</div><h3>3 · Setup</h3><p>Install and sign in to VS Code and the Copilot CLI on Windows, macOS and Linux, then verify and troubleshoot.</p><span class="tag new">simulator</span></a>
+  </div>
+
+  <h2 class="sec">Go deeper: interactive simulators</h2>
+  <div class="grid">
+    <a class="tile" href="Copilot_Sim_Customize.html"><div class="em">🧩</div><h3>4 · Skills, Agents, Tools, Hooks, MCP</h3><p>What each building block is, where its file lives, and how to write and run one for a FastAPI repo.</p><span class="tag new">simulator</span></a>
+    <a class="tile" href="Copilot_Sim_Security.html"><div class="em">🛡️</div><h3>5 · Security, Sandboxing, Git Worktrees</h3><p>Data handling, tool approvals, trusted folders, content exclusion, secrets, and isolating agents in worktrees.</p><span class="tag new">simulator</span></a>
+    <a class="tile" href="Copilot_Sim_Greenfield.html"><div class="em">🌱</div><h3>6 · Greenfield</h3><p>Build the ShipTrack FastAPI service from a one-page brief to a tested, CI-green pull request.</p><span class="tag new">simulator</span></a>
+    <a class="tile" href="Copilot_Sim_Brownfield.html"><div class="em">🏢</div><h3>7 · Brownfield</h3><p>Understand, document, safely refactor and extend Ledgerly, a legacy Django monolith.</p><span class="tag new">simulator</span></a>
+    <a class="tile" href="Copilot_Sim_Knowledge.html"><div class="em">🧠</div><h3>8 · Knowledge &amp; learning loop</h3><p>Custom instructions, AGENTS.md, prompt files, Copilot Memory and Spaces, and how a team teaches Copilot over time.</p><span class="tag new">simulator</span></a>
+    <a class="tile" href="Copilot_VSCode_vs_CLI.html"><div class="em">⚖️</div><h3>9 · VS Code agents vs CLI</h3><p>The same task in both surfaces, a side-by-side comparison and a "which fits me?" chooser.</p><span class="tag new">simulator</span></a>
+  </div>
+
+  <h2 class="sec">Reference &amp; practice</h2>
+  <div class="grid">
+    <a class="tile" href="Copilot_FAQ.html"><div class="em">❓</div><h3>10 · FAQ</h3><p>Straight answers on setup, features, customization, security, cost and day-to-day use.</p></a>
+    <a class="tile" href="Copilot_Training.html"><div class="em">🎓</div><h3>Training path</h3><p>Modules with a hands-on lab each, a progress tracker and a knowledge check.</p><span class="tag new">labs + quiz</span></a>
+    <a class="tile" href="Copilot_Onboarding_Kit.html"><div class="em">🧰</div><h3>Onboarding Kit</h3><p>First-week checklist, daily workflow, prompt cheat-sheet and a review checklist for AI-written code.</p><span class="tag new">checklists</span></a>
+  </div>
+
+  <h2 class="sec">The running case study</h2>
+  <p class="body">Every page follows the same team at <strong>Northwind Logistics</strong>, so examples build on each other:</p>
+  <div class="cards">
+    <div class="card blue"><h4>🌱 ShipTrack (greenfield)</h4><p>A new Python 3.12 + FastAPI parcel-tracking API with PostgreSQL, pytest and GitHub Actions CI.</p></div>
+    <div class="card amber"><h4>🏢 Ledgerly (brownfield)</h4><p>A 9-year-old Django invoicing monolith, about 60k lines, thin tests, that needs a CSV export and a safe refactor.</p></div>
+    <div class="card purple"><h4>👥 The team</h4><p><strong>Priya</strong> (senior backend dev), <strong>Marco</strong> (tech lead), <strong>Sam</strong> (security engineer) and <strong>Leo</strong> (developer, new joiner).</p></div>
+  </div>
+  <p class="body">Official docs: <a href="https://docs.github.com/en/copilot">docs.github.com/copilot</a> · <a href="https://code.visualstudio.com/docs/copilot/overview">VS Code Copilot docs</a> · <a href="https://github.com/github/copilot-cli">github/copilot-cli</a>. Copilot changes quickly; when a screen differs from these guides, the official docs win.</p>
+</div>
+</body>
+</html>

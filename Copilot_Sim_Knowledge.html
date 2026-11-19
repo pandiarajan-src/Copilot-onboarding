@@ -1,0 +1,335 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Knowledge &amp; Learning Loop · GitHub Copilot Onboarding Hub</title>
+<meta name="description" content="Teach GitHub Copilot your team's standards: repository and path-specific custom instructions, AGENTS.md, prompt files and skills, Copilot Memory, Copilot Spaces, and a learning loop that turns every correction into shared knowledge.">
+<link rel="stylesheet" href="assets/copilot-sim.css?v=1">
+<link rel="stylesheet" href="assets/copilot-kit.css?v=1">
+</head>
+<body>
+<header class="sim-header">
+  <div class="icon">🧠</div>
+  <div>
+    <h1>8 · Knowledge &amp; Learning Loop</h1>
+    <p>Where your team's knowledge lives so Copilot uses it, and how one correction becomes a rule every agent follows.</p>
+    <div class="stack-pills"><span class="pill">Updated November 2026</span><span class="pill">Custom instructions</span><span class="pill">AGENTS.md</span><span class="pill">Skills &amp; prompt files</span><span class="pill">Copilot Memory</span><span class="pill">Copilot Spaces</span></div>
+  </div>
+  <a class="home-link" href="index.html">⌂ All guides</a>
+</header>
+<div class="sim-body">
+  <nav class="sidebar" id="steps-nav" aria-label="Steps"></nav>
+  <main class="main-area">
+    <div class="progress-bar-container">
+      <div class="progress-bar-outer"><div class="progress-bar-inner" id="progress"></div></div>
+      <div class="progress-label" id="progress-label">Step 1</div>
+    </div>
+    <div class="step-content-area">
+
+<!-- 1 -->
+<section class="step-panel" data-section="Why" data-title="Why context matters" data-sub="The model only knows what it sees">
+  <div class="step-header"><div class="phase-tag teal">🗺️ Context</div><h2>The model doesn't know your codebase. Context does.</h2><p>Every request is your prompt plus whatever context Copilot gathers. Good context is the difference between "a FastAPI endpoint" and "a ShipTrack endpoint".</p></div>
+  <div class="flow"><span class="node done">Your prompt</span><span class="arrow">+</span><span class="node done">Open files &amp; references</span><span class="arrow">+</span><span class="node on">Instructions &amp; memory</span><span class="arrow">+</span><span class="node done">Tool results</span><span class="arrow">→</span><span class="node">Model</span></div>
+  <p class="body">Leo, the new joiner, asks Copilot for a new endpoint in ShipTrack. Without team context he gets working code that still breaks three team rules: synchronous DB calls, legacy SQLAlchemy queries and no error envelope. Marco rejects the PR. The fix is not a better prompt every time; it is writing the rules down once where Copilot reads them.</p>
+  <div class="tbl-wrap"><table class="tbl">
+    <tr><th>Knowledge source</th><th>Scope</th><th>Who writes it</th><th>Step</th></tr>
+    <tr><td><code>.github/copilot-instructions.md</code></td><td>Whole repo, every chat and agent request</td><td>Team, reviewed in PRs</td><td>2</td></tr>
+    <tr><td><code>.github/instructions/*.instructions.md</code></td><td>Files matching <code>applyTo</code></td><td>Team</td><td>3</td></tr>
+    <tr><td><code>AGENTS.md</code></td><td>Repo or folder, read by many AI tools</td><td>Team</td><td>4</td></tr>
+    <tr><td>Skills (and legacy prompt files)</td><td>A reusable task, on demand</td><td>Team</td><td>5</td></tr>
+    <tr><td>Copilot Memory</td><td>Facts Copilot learns per repo and per user</td><td>Copilot, governed by admins</td><td>6</td></tr>
+    <tr><td>Copilot Spaces</td><td>Curated collections of context on github.com</td><td>Anyone curating docs</td><td>7</td></tr>
+  </table></div>
+  <div class="callout info"><div class="icon">ℹ️</div><p>Custom instructions shape chat and agent responses. They <strong>do not affect inline suggestions</strong> as you type.</p></div>
+</section>
+
+<!-- 2 -->
+<section class="step-panel" data-section="Instructions" data-title="Repo instructions" data-sub=".github/copilot-instructions.md">
+  <div class="step-header"><div class="phase-tag green">📄 Repo-wide</div><h2>One file every request in the repo reads</h2><p><code>.github/copilot-instructions.md</code> holds the short list of things Copilot must know about this repo: stack, commands, conventions, no-go areas.</p></div>
+  <p class="body">Marco bootstraps it with the CLI, then edits it down. <code>/init</code> (or <code>copilot init</code>) drafts the file from the repo.</p>
+  <div class="terminal typer"><div class="terminal-header"><div class="terminal-dots"><div class="dot dot-r"></div><div class="dot dot-y"></div><div class="dot dot-g"></div></div><div class="terminal-title">bash — shiptrack</div><button class="run-btn">▶ Run</button></div><div class="terminal-body">
+<span class="l"><span class="t-prompt">~/code/shiptrack$</span> <span class="t-cmd">copilot</span></span>
+<span class="l"><span class="t-prompt">&gt;</span> <span class="t-cmd">/init</span></span>
+<span class="l t-info" data-wait="900">…reads pyproject.toml, app/, tests/, .github/workflows/…</span>
+<span class="l t-success">Drafted .github/copilot-instructions.md (review before committing)</span>
+<span class="l"><span class="t-prompt">&gt;</span> <span class="t-cmd">/instructions</span><span class="t-comment">        # see and toggle which instruction files are loaded</span></span>
+<span class="l"><span class="t-prompt">&gt;</span> <span class="t-cmd">/exit</span></span>
+<span class="l"><span class="t-prompt">~/code/shiptrack$</span> <span class="t-cmd">copilot instruction list</span><span class="t-comment">   # list every instruction source</span></span>
+</div></div>
+  <div class="doc"><div class="doc-bar">shiptrack/.github/copilot-instructions.md<span class="state">saved</span></div><div class="doc-body"><span class="md-h"># ShipTrack</span>
+Parcel-tracking REST API for Northwind Logistics.
+
+<span class="md-h">## Stack</span>
+- Python 3.12, FastAPI, Pydantic v2
+- PostgreSQL via SQLAlchemy 2 (async) + Alembic migrations
+- Tests: pytest + httpx AsyncClient. Lint: ruff.
+
+<span class="md-h">## Commands</span>
+- Install: <span class="md-s">`pip install -e ".[dev]"`</span>
+- Test: <span class="md-s">`pytest -q`</span>  Lint: <span class="md-s">`ruff check . &amp;&amp; ruff format --check .`</span>
+
+<span class="md-h">## Conventions</span>
+- Routers live in <span class="md-s">`app/routers/`</span>, one file per resource.
+- Request and response bodies are Pydantic models in <span class="md-s">`app/schemas.py`</span>.
+- Errors use the envelope <span class="md-s">`{"error": {"code": ..., "message": ...}}`</span>.
+- Read config from env vars via <span class="md-s">`app/config.py`</span>. Never hard-code credentials.
+
+<span class="md-h">## Don't</span>
+- Don't edit files in <span class="md-s">`alembic/versions/`</span> that are already merged.
+- Don't add dependencies without saying why.</div></div>
+  <ul class="check-list">
+    <li class="ok"><span class="ci">✓</span><div>Keep it short and specific. Every line costs context on every request.</div></li>
+    <li class="ok"><span class="ci">✓</span><div>Write facts and rules, not essays. Link to longer docs instead of pasting them.</div></li>
+    <li class="ok"><span class="ci">✓</span><div>Review changes to it in pull requests like code. It changes how every agent behaves.</div></li>
+  </ul>
+  <div class="callout tip"><div class="icon">💡</div><p>Personal preferences go in <code>~/.copilot/copilot-instructions.md</code> (or <code>~/.copilot/instructions/</code>), not in the repo file. The CLI merges all locations it finds, from the git root and the current folder.</p></div>
+</section>
+
+<!-- 3 -->
+<section class="step-panel" data-section="Instructions" data-title="Path-specific rules" data-sub=".instructions.md + applyTo">
+  <div class="step-header"><div class="phase-tag green">🎯 Scoped</div><h2>Rules that apply only to matching files</h2><p>Put rules for tests, migrations or one app in <code>.github/instructions/</code>. The <code>applyTo</code> globs decide when each file is used.</p></div>
+  <div class="filetree"><div class="ft-header">ShipTrack instruction layout</div><pre><span class="ft-folder">.github/</span>
+├── <span class="ft-file">copilot-instructions.md</span>          <span class="ft-note">repo-wide</span>
+└── <span class="ft-folder">instructions/</span>
+    ├── <span class="ft-new">tests.instructions.md</span>        <span class="ft-note">applyTo: tests/**/*.py</span>
+    └── <span class="ft-new">migrations.instructions.md</span>   <span class="ft-note">applyTo: alembic/**</span></pre></div>
+  <div data-tabs>
+    <div class="tabs"><button class="tab-btn on" data-tab="t">tests.instructions.md</button><button class="tab-btn" data-tab="m">migrations.instructions.md</button></div>
+    <div class="tab-pane on" data-pane="t">
+      <div class="doc"><div class="doc-bar">.github/instructions/tests.instructions.md<span class="state">new</span></div><div class="doc-body"><span class="md-c">---</span>
+<span class="md-k">name</span>: ShipTrack tests
+<span class="md-k">description</span>: How we write pytest tests for the API
+<span class="md-k">applyTo</span>: <span class="md-s">"tests/**/*.py"</span>
+<span class="md-c">---</span>
+- Use the <span class="md-s">`client`</span> fixture (httpx AsyncClient) from <span class="md-s">`tests/conftest.py`</span>.
+- Mark async tests with <span class="md-s">`@pytest.mark.anyio`</span>.
+- One behaviour per test; name tests <span class="md-s">`test_&lt;endpoint&gt;_&lt;behaviour&gt;`</span>.
+- Cover at least one error case (404, 422) for every endpoint.</div></div>
+    </div>
+    <div class="tab-pane" data-pane="m">
+      <div class="doc"><div class="doc-bar">.github/instructions/migrations.instructions.md<span class="state">new</span></div><div class="doc-body"><span class="md-c">---</span>
+<span class="md-k">name</span>: Alembic migrations
+<span class="md-k">description</span>: Rules for database migrations
+<span class="md-k">applyTo</span>: <span class="md-s">"alembic/**"</span>
+<span class="md-c">---</span>
+- Generate with <span class="md-s">`alembic revision --autogenerate -m "..."`</span>, then review the script.
+- Every <span class="md-s">`upgrade()`</span> has a working <span class="md-s">`downgrade()`</span>.
+- Never edit a migration that has been merged; add a new one.</div></div>
+    </div>
+  </div>
+  <div class="tbl-wrap"><table class="tbl">
+    <tr><th>Frontmatter</th><th>Meaning</th></tr>
+    <tr><td><code>applyTo</code></td><td>Comma-separated globs relative to the repo root. <code>**</code> means every file.</td></tr>
+    <tr><td><code>name</code>, <code>description</code></td><td>Label the file so people (and Copilot) know what it covers.</td></tr>
+  </table></div>
+  <div class="callout info"><div class="icon">ℹ️</div><p>Same idea at user level: <code>~/.copilot/instructions/**/*.instructions.md</code>. Claude-style rule files in <code>.claude/rules/</code> are also read (with <code>paths</code> or <code>applyTo</code> frontmatter).</p></div>
+</section>
+
+<!-- 4 -->
+<section class="step-panel" data-section="Instructions" data-title="AGENTS.md" data-sub="Cross-tool, nestable">
+  <div class="step-header"><div class="phase-tag green">🤝 Cross-tool</div><h2>AGENTS.md: one file many AI tools read</h2><p>If your team uses more than one coding agent, put shared guidance in <code>AGENTS.md</code>. Copilot reads it alongside its own instruction files.</p></div>
+  <p class="body">In Ledgerly, Marco uses a root <code>AGENTS.md</code> for the whole monolith and a nested one for the risky <code>invoices</code> app. Nested files are supported, so guidance sits next to the code it describes.</p>
+  <div class="filetree"><div class="ft-header">Ledgerly</div><pre><span class="ft-folder">ledgerly/</span>
+├── <span class="ft-file">AGENTS.md</span>                 <span class="ft-note">whole repo: Django 3.2 → upgrade, Celery, test commands</span>
+├── <span class="ft-folder">invoices/</span>
+│   ├── <span class="ft-new">AGENTS.md</span>             <span class="ft-note">views.py is being refactored; add characterization tests first</span>
+│   └── <span class="ft-file">views.py</span>              <span class="ft-note">600 lines</span>
+└── <span class="ft-folder">billing/ customers/ payments/ reports/</span></pre></div>
+  <div class="doc"><div class="doc-bar">ledgerly/AGENTS.md<span class="state">saved</span></div><div class="doc-body"><span class="md-h"># Ledgerly</span>
+Django 3.2 invoicing monolith, upgrading. Apps: billing, customers, invoices, payments, reports.
+
+<span class="md-h">## Before changing code</span>
+- Run <span class="md-s">`python manage.py test &lt;app&gt;`</span> for the app you touch. Coverage is thin (~30%).
+- Add a characterization test that pins current behaviour before refactoring.
+
+<span class="md-h">## Shared docs</span>
+@docs/architecture.md</div></div>
+  <p class="body">That last line is an <strong>import</strong>: the Copilot CLI supports <code>@path</code> imports in <code>AGENTS.md</code>, <code>CLAUDE.md</code> and <code>copilot-instructions.md</code>, so you can keep long docs in one place.</p>
+  <div class="tbl-wrap"><table class="tbl">
+    <tr><th>Use</th><th>When</th></tr>
+    <tr><td><code>.github/copilot-instructions.md</code></td><td>Copilot-only repo guidance.</td></tr>
+    <tr><td><code>AGENTS.md</code></td><td>Guidance shared with other agents, or folder-level guidance next to the code.</td></tr>
+    <tr><td><code>CLAUDE.md</code></td><td>Already have one? Copilot reads it too; no need to duplicate.</td></tr>
+  </table></div>
+  <div class="callout warn"><div class="icon">⚠️</div><p>In VS Code's deprecated Local harness, nested <code>AGENTS.md</code> files sit behind an experimental setting (<code>chat.useNestedAgentsMdFiles</code>, off by default). In the CLI, custom agents (subagents) do not get repo instructions unless their file sets <code>include-custom-instructions</code>.</p></div>
+</section>
+
+<!-- 5 -->
+<section class="step-panel" data-section="Reuse" data-title="Prompt files &amp; skills" data-sub="Reusable tasks">
+  <div class="step-header"><div class="phase-tag purple">🔁 Reuse</div><h2>Reusable prompts: prompt files are legacy, skills are the path</h2><p>Instructions say <em>how</em> to work. A reusable prompt captures <em>a task</em> you run often, like "add an endpoint with tests".</p></div>
+  <div class="callout warn"><div class="icon">⚠️</div><p><strong>Prompt files work only in VS Code's Local harness</strong>, which is deprecated and due for removal by February 2027. The default Copilot harness and the CLI use <strong>skills</strong> for reusable tasks. Migrate prompt files to skills.</p></div>
+  <div data-tabs>
+    <div class="tabs"><button class="tab-btn on" data-tab="skill">Skill (recommended)</button><button class="tab-btn" data-tab="prompt">Prompt file (legacy)</button></div>
+    <div class="tab-pane on" data-pane="skill">
+      <div class="doc"><div class="doc-bar">.github/skills/add-endpoint/SKILL.md<span class="state">new</span></div><div class="doc-body"><span class="md-c">---</span>
+<span class="md-k">name</span>: add-endpoint
+<span class="md-k">description</span>: Add a ShipTrack REST endpoint with schema, router, tests and docs. Use when asked to add or extend an API route.
+<span class="md-c">---</span>
+1. Add or reuse Pydantic models in <span class="md-s">`app/schemas.py`</span>.
+2. Add the route in <span class="md-s">`app/routers/&lt;resource&gt;.py`</span>, using the async session dependency.
+3. Write tests in <span class="md-s">`tests/test_&lt;resource&gt;.py`</span>: happy path, 404 and 422.
+4. Run <span class="md-s">`ruff check .`</span> and <span class="md-s">`pytest -q`</span>; fix until both pass.</div></div>
+      <p class="body">Run it as <code>/add-endpoint</code> in VS Code chat or the CLI, or let the model pick it up from the description. In the CLI, <code>/skills</code> lists what is loaded.</p>
+    </div>
+    <div class="tab-pane" data-pane="prompt">
+      <div class="doc"><div class="doc-bar">.github/prompts/add-endpoint.prompt.md<span class="state">legacy</span></div><div class="doc-body"><span class="md-c">---</span>
+<span class="md-k">name</span>: add-endpoint
+<span class="md-k">description</span>: Add a ShipTrack endpoint with tests
+<span class="md-k">argument-hint</span>: METHOD /path
+<span class="md-c">---</span>
+Add the endpoint the user describes, following our instructions, with tests.</div></div>
+      <p class="body">Invoked as <code>/add-endpoint</code> in Local-harness chat; <code>/prompts</code> lists them and <strong>Chat: New Prompt File</strong> creates one. Prompt-file support in the CLI is not documented; use skills there.</p>
+    </div>
+  </div>
+  <p class="body">Building skills, agents and hooks in depth: <a href="Copilot_Sim_Customize.html">Skills · Agents · Tools · Hooks · MCP</a>.</p>
+</section>
+
+<!-- 6 -->
+<section class="step-panel" data-section="Learned" data-title="Copilot Memory" data-sub="Facts Copilot keeps">
+  <div class="step-header"><div class="phase-tag amber">💾 Memory</div><h2>Copilot Memory: what Copilot learns by itself</h2><p>Instead of only reading files you wrote, Copilot can store facts it discovers while working and reuse them later.</p></div>
+  <div class="callout warn"><div class="icon">⚠️</div><p><strong>Check current docs.</strong> Copilot Memory is evolving quickly: availability, policy names and limits below reflect the docs at the time of writing and may change.</p></div>
+  <div class="cards">
+    <div class="card blue"><h4>Repository facts</h4><p>Conventions, architecture, build and test commands. Scoped to one repo, shared with its collaborators, and cited back to the code.</p></div>
+    <div class="card purple"><h4>User preferences</h4><p>Your personal style. Follow you across repos; cited with quotes from your sessions.</p></div>
+  </div>
+  <div class="tbl-wrap"><table class="tbl">
+    <tr><th>Who</th><th>Control</th></tr>
+    <tr><td>Plans</td><td>Available on paid plans. On Business and Enterprise it is off until an org or enterprise owner enables the policy.</td></tr>
+    <tr><td>Owners</td><td>Allow repo facts for all, selected or no repos; set an expiry for repo facts between 7 and 180 days; export or delete members' user preferences.</td></tr>
+    <tr><td>Repo admins</td><td>Turn Memory off for a single repo.</td></tr>
+    <tr><td>You</td><td>Review and delete your memories on the Memory page in your personal settings.</td></tr>
+  </table></div>
+  <h3 class="subsection">Memory in the CLI</h3>
+  <div class="terminal typer"><div class="terminal-header"><div class="terminal-dots"><div class="dot dot-r"></div><div class="dot dot-y"></div><div class="dot dot-g"></div></div><div class="terminal-title">bash — shiptrack</div><button class="run-btn">▶ Run</button></div><div class="terminal-body">
+<span class="l"><span class="t-comment"># Preview an import of team facts (JSONL) without writing anything</span></span>
+<span class="l"><span class="t-prompt">$</span> <span class="t-cmd">copilot memories import shiptrack-facts.jsonl --dry-run</span></span>
+<span class="l" data-wait="600"><span class="t-prompt">$</span> <span class="t-cmd">copilot memories import shiptrack-facts.jsonl --on-conflict skip</span></span>
+<span class="l"> </span>
+<span class="l"><span class="t-comment"># Memory is not used in -p runs unless you opt in</span></span>
+<span class="l"><span class="t-prompt">$</span> <span class="t-cmd">copilot -p "Summarise how tests are run here" --enable-memory</span></span>
+</div></div>
+  <div class="callout tip"><div class="icon">💡</div><p>Memory complements instructions; it doesn't replace them. Rules the team agrees on belong in reviewed files. Memory is good at the long tail of facts nobody wrote down.</p></div>
+</section>
+
+<!-- 7 -->
+<section class="step-panel" data-section="Learned" data-title="Copilot Spaces" data-sub="Curated context collections">
+  <div class="step-header"><div class="phase-tag amber">🗂️ Spaces</div><h2>Copilot Spaces: curated context on github.com</h2><p>A Space gathers the files, docs and notes for one topic so people can ask Copilot questions grounded in them.</p></div>
+  <div class="callout warn"><div class="icon">⚠️</div><p><strong>Check current docs.</strong> The exact current behaviour of Spaces (what you can add, sharing rules, limits) was not verified for this guide. Treat the ideas below as patterns, not a feature list.</p></div>
+  <div class="cards">
+    <div class="card teal"><h4>Good fit</h4><p>Cross-repo knowledge: Northwind's API style guide, the parcel-status state machine, the incident runbook. Things that don't belong to one repo.</p></div>
+    <div class="card amber"><h4>Not a fit</h4><p>Rules every agent must follow inside a repo. Those go in instruction files, versioned with the code.</p></div>
+    <div class="card purple"><h4>From your editor</h4><p>The GitHub MCP server exposes Spaces tools in some clients, so an agent can pull a Space's content into a session.</p></div>
+  </div>
+  <p class="body">Leo's onboarding Space at Northwind holds the ShipTrack brief, the API style guide and links to both repos' instruction files. He asks it "what's our error format?" before writing code.</p>
+</section>
+
+<!-- 8 -->
+<section class="step-panel" data-section="Loop" data-title="The learning loop" data-sub="Correct → capture → verify → share">
+  <div class="step-header"><div class="phase-tag coral">🔄 Loop</div><h2>Turn every correction into team knowledge</h2><p>When you correct Copilot twice for the same thing, the correction belongs in a file, not in your head.</p></div>
+  <div class="flow"><span class="node done">1 Correct</span><span class="arrow">→</span><span class="node done">2 Capture</span><span class="arrow">→</span><span class="node on">3 Verify</span><span class="arrow">→</span><span class="node">4 Share</span><span class="arrow">↺</span></div>
+  <div class="tbl-wrap"><table class="tbl">
+    <tr><th>Stage</th><th>What you do</th><th>Output</th></tr>
+    <tr><td><strong>Correct</strong></td><td>Spot the wrong pattern in a diff and fix it in the session.</td><td>A working change.</td></tr>
+    <tr><td><strong>Capture</strong></td><td>Write the rule as one imperative line in the narrowest file that fits.</td><td>Edited instruction or skill file.</td></tr>
+    <tr><td><strong>Verify</strong></td><td>Start a fresh session and repeat the original request. Check the rule is applied.</td><td>Evidence the rule works.</td></tr>
+    <tr><td><strong>Share</strong></td><td>Open a PR; the owner reviews and merges. Everyone's next session gets it.</td><td>Team-wide behaviour change.</td></tr>
+  </table></div>
+  <h3 class="subsection">Worked example: Priya and the legacy query style</h3>
+  <div class="chat reveal"><div class="chat-header copilot">🤖 VS Code · Copilot Chat <span class="tag">Agent · shiptrack</span></div><div class="chat-body">
+    <div class="msg user"><div class="who">Priya</div><div class="bubble">Add GET /shipments/{id}/events returning events newest first.</div></div>
+    <div class="msg ai"><div class="who">Copilot</div><div class="bubble">Added the route in <code>app/routers/shipments.py</code>:<pre>events = db.query(Event).filter(Event.shipment_id == id)...</pre></div></div>
+    <div class="msg user"><div class="who">Priya</div><div class="bubble"><strong>Correct:</strong> We use SQLAlchemy 2 style with the async session: <code>await session.scalars(select(Event).where(...).order_by(Event.created_at.desc()))</code>. No <code>session.query()</code>. Please fix.</div></div>
+    <div class="msg ai"><div class="who">Copilot</div><div class="bubble">Updated to <code>select()</code> with <code>AsyncSession</code>; tests pass.</div></div>
+    <div class="msg user"><div class="who">Priya</div><div class="bubble"><strong>Capture:</strong> Add that rule to a new instructions file for <code>app/**/*.py</code>, one line, and show me the diff.</div></div>
+    <div class="msg hook"><div class="who">Tool</div><div class="bubble">Created <code>.github/instructions/database.instructions.md</code> (Priya reviews and approves the write).</div></div>
+  </div></div>
+  <div class="doc"><div class="doc-bar">.github/instructions/database.instructions.md<span class="state">new</span></div><div class="doc-body"><span class="md-c">---</span>
+<span class="md-k">name</span>: Database access
+<span class="md-k">description</span>: SQLAlchemy 2 async patterns for ShipTrack
+<span class="md-k">applyTo</span>: <span class="md-s">"app/**/*.py"</span>
+<span class="md-c">---</span>
+- Query with <span class="md-s">`select()`</span> on an <span class="md-s">`AsyncSession`</span> (<span class="md-s">`await session.scalars(...)`</span>). Never use <span class="md-s">`session.query()`</span>.
+- Get the session from the <span class="md-s">`get_session`</span> dependency; never create engines in routers.</div></div>
+  <p class="body"><strong>Verify:</strong> Priya opens a new chat and asks for <code>GET /shipments/{id}</code>. The response uses <code>select()</code> without being told. <strong>Share:</strong> she opens a PR; Marco, who owns <code>.github/instructions/</code>, approves it. Leo's next endpoint is right the first time.</p>
+  <div class="callout tip"><div class="icon">💡</div><p>In the CLI, <code>/chronicle</code> mines your session history (for example for tips or improvements), and <code>/feedback</code> sends feedback to GitHub. Use them to find corrections worth capturing.</p></div>
+</section>
+
+<!-- 9 -->
+<section class="step-panel" data-section="Loop" data-title="Team-scale practice" data-sub="Ownership, review, hygiene">
+  <div class="step-header"><div class="phase-tag teal">👥 Team</div><h2>Run knowledge like code</h2><p>Instruction files are shared configuration for every developer's agent. Give them owners, reviews and a cleanup rhythm.</p></div>
+  <ul class="check-list">
+    <li class="ok"><span class="ci">✓</span><div><strong>Owners:</strong> Marco owns <code>.github/copilot-instructions.md</code>, <code>.github/instructions/</code> and <code>AGENTS.md</code> via CODEOWNERS. Sam co-owns anything about secrets or auth.</div></li>
+    <li class="ok"><span class="ci">✓</span><div><strong>One rule, one place:</strong> repo-wide facts in the repo file, scoped rules in <code>.instructions.md</code>, tasks in skills. No copies.</div></li>
+    <li class="ok"><span class="ci">✓</span><div><strong>Small PRs:</strong> each captured correction is its own PR, linked to the session or PR where it came up.</div></li>
+    <li class="ok"><span class="ci">✓</span><div><strong>Verify on review:</strong> the reviewer reruns the triggering prompt in a fresh session before approving.</div></li>
+    <li class="ok"><span class="ci">✓</span><div><strong>Monthly prune:</strong> delete rules that tools (ruff, CI) now enforce, and merge duplicates. Shorter files work better.</div></li>
+    <li class="ok"><span class="ci">✓</span><div><strong>Onboarding:</strong> new joiners like Leo read the instruction files on day one; they are the team's living style guide.</div></li>
+  </ul>
+  <div class="tbl-wrap"><table class="tbl">
+    <tr><th>Signal</th><th>Action</th></tr>
+    <tr><td>Same review comment on two agent PRs</td><td>Capture as an instruction.</td></tr>
+    <tr><td>A rule the linter can check</td><td>Move it to ruff config; drop it from instructions.</td></tr>
+    <tr><td>Multi-step task repeated weekly</td><td>Turn it into a skill.</td></tr>
+    <tr><td>Knowledge spanning several repos</td><td>Curate it in a Space or a shared doc imported with <code>@path</code>.</td></tr>
+  </table></div>
+</section>
+
+<!-- 10 -->
+<section class="step-panel" data-section="Check" data-title="Quick quiz" data-sub="5 questions">
+  <div class="step-header"><div class="phase-tag purple">🎯 Quiz</div><h2>Check your understanding</h2><p>Pick one answer per question. Four of five is a pass.</p></div>
+  <div class="quiz">
+    <div class="q" data-why="Path-specific .instructions.md files use applyTo globs, so a test-only rule loads only for matching test files.">
+      <p>1. Priya wants a rule that applies only to files under tests/. Where should it go?</p>
+      <button class="qo">At the bottom of .github/copilot-instructions.md</button>
+      <button class="qo" data-ok>.github/instructions/tests.instructions.md with applyTo: "tests/**/*.py"</button>
+      <button class="qo">In her personal ~/.copilot/copilot-instructions.md</button>
+    </div>
+    <div class="q" data-why="Custom instructions shape chat and agent responses but do not affect inline suggestions.">
+      <p>2. Which Copilot feature do custom instructions NOT affect?</p>
+      <button class="qo">Agent mode in VS Code</button>
+      <button class="qo">Copilot CLI sessions</button>
+      <button class="qo" data-ok>Inline suggestions while typing</button>
+    </div>
+    <div class="q" data-why="Prompt files are a Local-harness feature, and that harness is deprecated. Skills work in the Copilot harness and the CLI.">
+      <p>3. Marco has a .prompt.md file the team runs weekly. What should he do?</p>
+      <button class="qo" data-ok>Migrate it to a skill in .github/skills/&lt;name&gt;/SKILL.md</button>
+      <button class="qo">Copy it into AGENTS.md</button>
+      <button class="qo">Nothing; prompt files are the recommended path for the CLI</button>
+    </div>
+    <div class="q" data-why="On Business and Enterprise plans Copilot Memory is disabled until an org or enterprise owner enables the policy.">
+      <p>4. Northwind is on Copilot Business and Leo sees no Copilot Memory. The most likely reason?</p>
+      <button class="qo">Memory only works in the CLI</button>
+      <button class="qo" data-ok>An owner has not enabled the Memory policy yet</button>
+      <button class="qo">Memory requires an AGENTS.md file</button>
+    </div>
+    <div class="q" data-why="Verify means repeating the original request in a fresh session to prove the captured rule is applied, before sharing it with the team.">
+      <p>5. In the learning loop, what does "verify" mean?</p>
+      <button class="qo">Ask the same chat session if it remembers the rule</button>
+      <button class="qo">Merge the PR and wait for complaints</button>
+      <button class="qo" data-ok>Rerun the original request in a new session and check the rule is applied</button>
+    </div>
+  </div>
+</section>
+
+<!-- 11 -->
+<section class="step-panel" data-section="Next" data-title="Where to go next" data-sub="Related guides">
+  <div class="step-header"><div class="phase-tag green">🧭 Next</div><h2>Where to go next</h2><p>Your team's knowledge now lives in files Copilot reads, and every correction makes it better.</p></div>
+  <div class="cards">
+    <div class="card blue"><h4><a href="Copilot_Sim_Customize.html">🧩 Customize</a></h4><p>Write skills, custom agents and hooks that build on your instructions.</p></div>
+    <div class="card green"><h4><a href="Copilot_Sim_Greenfield.html">🌱 Greenfield</a></h4><p>See ShipTrack's instructions in action from brief to PR.</p></div>
+    <div class="card amber"><h4><a href="Copilot_Sim_Brownfield.html">🏢 Brownfield</a></h4><p>Write AGENTS.md for Ledgerly and use it to refactor safely.</p></div>
+    <div class="card coral"><h4><a href="Copilot_Sim_Security.html">🛡️ Security</a></h4><p>Approvals, sandboxing and worktrees for agents that act on your behalf.</p></div>
+    <div class="card purple"><h4><a href="Copilot_VSCode_vs_CLI.html">⚖️ VS Code vs CLI</a></h4><p>Which knowledge files each surface reads, side by side.</p></div>
+    <div class="card teal"><h4><a href="Copilot_Training.html">🎓 Training path</a></h4><p>Hands-on labs, including writing your first instructions file.</p></div>
+  </div>
+  <p class="body">Official docs: <a href="https://code.visualstudio.com/docs/agent-customization/custom-instructions">VS Code custom instructions</a> · <a href="https://code.visualstudio.com/docs/agent-customization/agent-skills">Agent skills</a> · <a href="https://docs.github.com/en/copilot/concepts/agents/copilot-memory">Copilot Memory</a> · <a href="https://docs.github.com/en/copilot">Copilot docs</a>.</p>
+</section>
+
+    </div>
+  </main>
+</div>
+<script src="assets/copilot-sim.js?v=1"></script>
+<script src="assets/copilot-kit.js?v=1"></script>
+</body>
+</html>

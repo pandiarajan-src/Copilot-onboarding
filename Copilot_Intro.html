@@ -1,0 +1,287 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>1 · Introduction to GitHub Copilot</title>
+<meta name="description" content="What GitHub Copilot is, how it works, the surfaces this hub covers (VS Code and the Copilot CLI), plans and AI Credits, realistic benefits, your responsibilities, and the Northwind case studies.">
+<link rel="stylesheet" href="assets/copilot-sim.css?v=1">
+<link rel="stylesheet" href="assets/copilot-kit.css?v=1">
+</head>
+<body>
+<header class="sim-header">
+  <div class="icon">👋</div>
+  <div>
+    <h1>1 · Introduction to GitHub Copilot</h1>
+    <p>What Copilot is, how it works, what it costs, what it is good at, and what stays your job.</p>
+    <div class="stack-pills"><span class="pill">Updated November 2026</span><span class="pill">VS Code · Copilot Chat &amp; agents</span><span class="pill">GitHub Copilot CLI</span><span class="pill">Windows · macOS · Linux</span><span class="pill">~15 min</span></div>
+  </div>
+  <a class="home-link" href="index.html">⌂ All guides</a>
+</header>
+<div class="sim-body">
+  <nav class="sidebar" id="steps-nav" aria-label="Steps"></nav>
+  <main class="main-area">
+    <div class="progress-bar-container">
+      <div class="progress-bar-outer"><div class="progress-bar-inner" id="progress"></div></div>
+      <div class="progress-label" id="progress-label">Step 1</div>
+    </div>
+    <div class="step-content-area">
+
+<!-- 1 -->
+<section class="step-panel" data-section="The basics" data-title="What Copilot is" data-sub="Pair programmer → agent">
+  <div class="step-header"><div class="phase-tag">🤖 Overview</div><h2>An AI pair programmer that can now also act</h2><p>GitHub Copilot started as autocomplete for code. Today it is a family of AI features that suggest, explain, edit and, as an agent, carry out multi-step tasks using tools.</p></div>
+
+  <div class="flow"><span class="node done">Inline suggestions</span><span class="arrow">→</span><span class="node done">Next edit suggestions</span><span class="arrow">→</span><span class="node done">Chat</span><span class="arrow">→</span><span class="node on">Agents (local · background · cloud)</span><span class="arrow">→</span><span class="node">Code review · CLI · MCP tools</span></div>
+
+  <div class="cards">
+    <div class="card blue"><h4>✍️ Assists while you type</h4><p>Inline suggestions complete the line or block you are writing. Next edit suggestions predict the next change you are likely to make elsewhere in the file.</p></div>
+    <div class="card purple"><h4>💬 Answers and edits on request</h4><p>Chat sits beside your code. Ask how something works, or ask for a change and review the diff.</p></div>
+    <div class="card green"><h4>🛠️ Works as an agent</h4><p>An agent plans, reads files, edits code, runs commands and tests, looks at the results and keeps going until the task is done or it needs you.</p></div>
+  </div>
+
+  <h3 class="subsection">What "agentic" means in practice</h3>
+  <p class="body">A plain chat answer is text you copy. An agent <strong>calls tools</strong>: it can search the repo, write files, run <code>pytest</code> in a terminal or call an MCP server. Each tool call returns a result that the model reads before choosing the next step. You decide which tools it may use and when it must ask first.</p>
+
+  <div class="callout info"><div class="icon">ℹ️</div><p>Copilot uses models from several providers. You can pick one, let <strong>Auto</strong> pick for you, or bring your own key (BYOK) for chat models. The exact model list changes often, so this hub does not name specific models.</p></div>
+</section>
+
+<!-- 2 -->
+<section class="step-panel" data-section="The basics" data-title="How it works" data-sub="Context → model → you review">
+  <div class="step-header"><div class="phase-tag teal">⚙️ Mechanics</div><h2>Context in, suggestion out, you decide</h2><p>Every Copilot feature follows the same loop. Knowing it explains most good and bad results.</p></div>
+
+  <div class="flow"><span class="node done">1 · Your prompt or code</span><span class="arrow">+</span><span class="node done">2 · Gathered context</span><span class="arrow">→</span><span class="node on">3 · Chosen model</span><span class="arrow">→</span><span class="node">4 · Suggestion / edits / tool calls</span><span class="arrow">→</span><span class="node">5 · You review</span></div>
+
+  <h3 class="subsection">What counts as context</h3>
+  <ul class="check-list">
+    <li class="ok"><span class="ci">📄</span><div><strong>Open files and your selection</strong>: the code you are looking at right now.</div></li>
+    <li class="ok"><span class="ci">📌</span><div><strong>Custom instructions</strong>: files such as <code>.github/copilot-instructions.md</code> or <code>AGENTS.md</code> that state your team's conventions. (They shape chat and agents, not inline suggestions.)</div></li>
+    <li class="ok"><span class="ci">#️⃣</span><div><strong>References you add</strong>: files or other items you attach to the prompt explicitly.</div></li>
+    <li class="ok"><span class="ci">🔧</span><div><strong>Tool results</strong>: search hits, test output, terminal output and MCP responses that an agent collects as it works.</div></li>
+  </ul>
+
+  <h3 class="subsection">The agent loop, step by step</h3>
+  <div class="chat reveal">
+    <div class="chat-header copilot">🤖 VS Code · Copilot Chat <span class="tag">Agent · shiptrack</span></div>
+    <div class="chat-body">
+      <div class="msg user"><div class="who">Priya</div><div class="bubble">Add <code>GET /shipments/{id}</code> that returns 404 when the shipment does not exist. Add tests.</div></div>
+      <div class="msg hook"><div class="who">Tool</div><div class="bubble">search → app/routers/shipments.py, app/models.py, tests/test_shipments.py</div></div>
+      <div class="msg ai"><div class="who">Copilot</div><div class="bubble">The router already has <code>POST /shipments</code>. I'll add the GET handler next to it, reuse the <code>Shipment</code> schema, and add two tests (found / not found).</div></div>
+      <div class="msg hook"><div class="who">Tool</div><div class="bubble">edit → app/routers/shipments.py (+14) · tests/test_shipments.py (+22)</div></div>
+      <div class="msg hook"><div class="who">Tool</div><div class="bubble">run in terminal? pytest -q tests/test_shipments.py   [Allow] [Skip]</div></div>
+      <div class="msg hook"><div class="who">Tool</div><div class="bubble">pytest → 6 passed in 0.41s</div></div>
+      <div class="msg ai"><div class="who">Copilot</div><div class="bubble">Done. The new route and both tests pass. Please review the diff, in particular the 404 message format.</div></div>
+    </div>
+  </div>
+  <div class="callout tip"><div class="icon">💡</div><p>Better context beats a longer prompt. If results drift from your conventions, fix the <strong>instructions</strong> or the <strong>files you attach</strong> before you rewrite the prompt.</p></div>
+</section>
+
+<!-- 3 -->
+<section class="step-panel" data-section="The basics" data-title="Surfaces in this hub" data-sub="VS Code + Copilot CLI">
+  <div class="step-header"><div class="phase-tag purple">🖥️ Surfaces</div><h2>Two places to work: the editor and the terminal</h2><p>This hub covers <strong>VS Code</strong> and the <strong>GitHub Copilot CLI</strong> on Windows, macOS and Linux. They share the same repo customization files, so what you set up once works in both.</p></div>
+
+  <div data-tabs>
+    <div class="tabs">
+      <button class="tab-btn on" data-tab="vsc">VS Code</button>
+      <button class="tab-btn" data-tab="cli">Copilot CLI</button>
+      <button class="tab-btn" data-tab="other">Other surfaces</button>
+    </div>
+    <div class="tab-pane on" data-pane="vsc">
+      <ul class="check-list">
+        <li class="ok"><span class="ci">✓</span><div><strong>Editor</strong>: inline suggestions, next edit suggestions and inline chat.</div></li>
+        <li class="ok"><span class="ci">✓</span><div><strong>Chat view</strong>: built-in <strong>Ask</strong>, <strong>Agent</strong> and <strong>Plan</strong> agents next to your code.</div></li>
+        <li class="ok"><span class="ci">✓</span><div><strong>Agents window</strong>: run and coordinate several agent sessions, each on a branch or its own worktree.</div></li>
+        <li class="ok"><span class="ci">✓</span><div><strong>Session target</strong>: choose the harness that runs a session. <strong>Copilot</strong> is the default; Claude and Codex are options; the <strong>Local</strong> harness is deprecated and scheduled for removal by February 2027.</div></li>
+      </ul>
+    </div>
+    <div class="tab-pane" data-pane="cli">
+      <p class="body">Run <code>copilot</code> for an interactive session, or pass <code>-p</code> to run one prompt and exit (handy for scripts and CI).</p>
+      <div class="terminal typer">
+        <div class="terminal-header"><div class="terminal-dots"><div class="dot dot-r"></div><div class="dot dot-y"></div><div class="dot dot-g"></div></div><div class="terminal-title">bash — shiptrack</div><button class="run-btn">▶ Run</button></div>
+        <div class="terminal-body">
+<span class="l"><span class="t-prompt">marco@nw:~/shiptrack$</span> <span class="t-cmd">copilot version</span></span>
+<span class="l t-output">(prints the installed CLI version)</span>
+<span class="l"><span class="t-prompt">marco@nw:~/shiptrack$</span> <span class="t-cmd">copilot -p "Summarise what this repo does in 5 bullets" -s</span></span>
+<span class="l t-output" data-wait="700">- FastAPI service for parcel tracking (ShipTrack)</span>
+<span class="l t-output">- Shipments and tracking events stored in PostgreSQL via SQLAlchemy 2</span>
+<span class="l t-output">- Alembic migrations under migrations/</span>
+<span class="l t-output">- pytest + httpx tests under tests/</span>
+<span class="l t-output">- CI in .github/workflows/ci.yml runs ruff and pytest</span>
+<span class="l"><span class="t-prompt">marco@nw:~/shiptrack$</span> <span class="t-cmd">copilot</span></span>
+<span class="l t-hl">Interactive session started. Shift+Tab cycles standard / plan / autopilot.</span>
+        </div>
+      </div>
+      <p class="body">Output is illustrative. Marco, the tech lead, lives in the terminal, so you will see the CLI in his parts of the story.</p>
+    </div>
+    <div class="tab-pane" data-pane="other">
+      <p class="body">Copilot also runs on github.com (code review, the cloud agent), in the Copilot app and in other IDEs such as JetBrains and Visual Studio. This hub mentions them only where a workflow touches them.</p>
+    </div>
+  </div>
+
+  <div class="tbl-wrap"><table class="tbl">
+    <tr><th>Shared by both surfaces</th><th>Where it lives</th></tr>
+    <tr><td>Repo instructions</td><td><code>.github/copilot-instructions.md</code>, <code>AGENTS.md</code>, <code>.github/instructions/</code></td></tr>
+    <tr><td>Custom agents · skills · hooks</td><td><code>.github/agents/</code> · <code>.github/skills/</code> · <code>.github/hooks/</code></td></tr>
+    <tr><td>Your personal settings</td><td><code>~/.copilot/</code> (user instructions, agents, skills, MCP config)</td></tr>
+  </table></div>
+</section>
+
+<!-- 4 -->
+<section class="step-panel" data-section="Plans &amp; value" data-title="Plans &amp; billing" data-sub="AI Credits">
+  <div class="step-header"><div class="phase-tag amber">💳 Plans</div><h2>Plans and usage-based AI Credits</h2><p>Copilot billing is now based on <strong>GitHub AI Credits</strong>. Each paid plan includes a monthly credit allowance. Older docs and READMEs may still say "premium requests"; that is the previous model.</p></div>
+
+  <div class="callout warn"><div class="icon">⚠️</div><p><strong>Check current pricing before you budget.</strong> The figures below were read from GitHub's plans page in November 2026 and change over time. The <a href="https://docs.github.com/en/copilot/get-started/plans">official plans page</a> is the source of truth.</p></div>
+
+  <div class="tbl-wrap"><table class="tbl">
+    <tr><th>Plan</th><th>Price (as read)</th><th>Included usage</th><th>Notes</th></tr>
+    <tr><td><strong>Free</strong></td><td>$0</td><td>2,000 completions / month</td><td>Auto model selection only; limited agent use</td></tr>
+    <tr><td><strong>Student</strong></td><td>Free (education)</td><td>See plans page</td><td>For verified students</td></tr>
+    <tr><td><strong>Pro</strong></td><td>$10 / month</td><td>1,500 AI Credits (1,000 base + 500 flex)</td><td>Individual developers</td></tr>
+    <tr><td><strong>Pro+</strong></td><td>$39 / month</td><td>7,000 AI Credits (3,900 + 3,100)</td><td>Heavier individual use</td></tr>
+    <tr><td><strong>Max</strong> <span class="badge-new">new</span></td><td>$100 / month</td><td>20,000 AI Credits (10,000 + 10,000)</td><td>Highest individual allowance</td></tr>
+    <tr><td><strong>Business</strong></td><td>$19 / seat / month</td><td>1,900 AI Credits per seat</td><td>Org policies and admin controls</td></tr>
+    <tr><td><strong>Enterprise</strong></td><td>$39 / seat / month</td><td>3,900 AI Credits per seat</td><td>Enterprise policies and controls</td></tr>
+    <tr><td><strong>Copilot access</strong></td><td>$0 with GHEC, or $10 standalone</td><td>No included allowance</td><td>Pay for what you use</td></tr>
+  </table></div>
+
+  <ul class="check-list">
+    <li class="ok"><span class="ci">✓</span><div><strong>Every plan includes the Copilot CLI</strong> (and the Copilot app).</div></li>
+    <li class="ok"><span class="ci">✓</span><div><strong>The cloud agent needs a paid plan.</strong></div></li>
+    <li><span class="ci">!</span><div><strong>Not available on GitHub Enterprise Server.</strong></div></li>
+    <li><span class="ci">!</span><div><strong>Model choice affects cost.</strong> Premium or high-cost models consume more credits per request than lighter ones.</div></li>
+  </ul>
+
+  <h3 class="subsection">Keep an eye on usage from the CLI</h3>
+  <div class="terminal">
+    <div class="terminal-header"><div class="terminal-dots"><div class="dot dot-r"></div><div class="dot dot-y"></div><div class="dot dot-g"></div></div><div class="terminal-title">copilot — shiptrack</div></div>
+    <div class="terminal-body">
+<span class="l"><span class="t-comment"># inside an interactive session</span></span>
+<span class="l"><span class="t-prompt">&gt;</span> <span class="t-cmd">/usage</span>                  <span class="t-comment"># what this session has used</span></span>
+<span class="l"><span class="t-prompt">&gt;</span> <span class="t-cmd">/limits</span>                 <span class="t-comment"># view limits; /limits set max-ai-credits caps spend</span></span>
+<span class="l"><span class="t-comment"># or cap a scripted run up front</span></span>
+<span class="l"><span class="t-prompt">$</span> <span class="t-cmd">copilot -p "Fix the ruff warnings" --max-ai-credits &lt;N&gt;</span></span>
+    </div>
+  </div>
+</section>
+
+<!-- 5 -->
+<section class="step-panel" data-section="Plans &amp; value" data-title="Benefits" data-sub="Realistic, not hype">
+  <div class="step-header"><div class="phase-tag green">📈 Value</div><h2>Where professional developers actually gain time</h2><p>Copilot does not replace engineering judgement. It removes friction from work you already know how to judge. Gains vary by task, codebase and how well you set it up.</p></div>
+
+  <div class="tbl-wrap"><table class="tbl">
+    <tr><th>Task</th><th>Typical fit</th><th>Why</th></tr>
+    <tr><td>Boilerplate, schemas, glue code</td><td class="y">Strong</td><td>Patterns are common and easy to verify by reading.</td></tr>
+    <tr><td>Writing tests for existing behaviour</td><td class="y">Strong</td><td>Running the tests gives fast, objective feedback.</td></tr>
+    <tr><td>Understanding unfamiliar code</td><td class="y">Strong</td><td>Ask mode explains code without changing it; you check against the source.</td></tr>
+    <tr><td>Multi-file changes with a clear spec</td><td class="p">Good with review</td><td>Agents handle the mechanics; you still review design and edge cases.</td></tr>
+    <tr><td>Refactoring legacy code</td><td class="p">Good with tests first</td><td>Safe only once characterization tests pin current behaviour.</td></tr>
+    <tr><td>Security-critical or novel algorithms</td><td class="n">Assist only</td><td>Subtle errors are costly and hard to spot. Treat output as a draft.</td></tr>
+  </table></div>
+
+  <h3 class="subsection">What each Northwind role gets</h3>
+  <div class="cards">
+    <div class="card blue"><h4>Priya · senior backend</h4><p>Hands routine endpoints and tests to agent mode, keeps her attention on data model and API design.</p></div>
+    <div class="card purple"><h4>Marco · tech lead</h4><p>Encodes standards once in instruction files so every session follows them; uses <code>/review</code> before human review.</p></div>
+    <div class="card coral"><h4>Sam · security</h4><p>Runs <code>/security-review</code> on risky changes and sets tool approval rules for the team.</p></div>
+    <div class="card green"><h4>Leo · new joiner</h4><p>Asks questions about Ledgerly in Ask mode instead of interrupting the team for every module.</p></div>
+  </div>
+  <div class="callout info"><div class="icon">ℹ️</div><p>Measure benefit on your own work: compare cycle time and review rework on a few real tickets before and after, rather than relying on headline percentages.</p></div>
+</section>
+
+<!-- 6 -->
+<section class="step-panel" data-section="Plans &amp; value" data-title="Limits &amp; responsibilities" data-sub="You own the code">
+  <div class="step-header"><div class="phase-tag coral">⚖️ Responsibility</div><h2>You own every line that ships</h2><p>Copilot can be wrong with confidence. It can misread context, invent an API, or pass tests that check the wrong thing. Treat its output like a pull request from a fast new colleague.</p></div>
+
+  <h3 class="subsection">Known limits</h3>
+  <ul class="check-list">
+    <li><span class="ci">✗</span><div><strong>It can be wrong.</strong> Plausible code is not proof of correct code. Read it, run it, test it.</div></li>
+    <li><span class="ci">✗</span><div><strong>It only knows what is in context.</strong> Missing instructions or files lead to generic answers that ignore your conventions.</div></li>
+    <li><span class="ci">✗</span><div><strong>Instructions do not steer inline suggestions.</strong> They apply to chat and agents.</div></li>
+    <li><span class="ci">✗</span><div><strong>Content exclusion is not a security boundary.</strong> It reduces what Copilot reads but may not catch indirect access.</div></li>
+  </ul>
+
+  <h3 class="subsection">Your responsibilities</h3>
+  <ul class="check-list">
+    <li class="ok"><span class="ci">✓</span><div><strong>Review every diff</strong> before you commit, exactly as you would a teammate's.</div></li>
+    <li class="ok"><span class="ci">✓</span><div><strong>Never paste secrets</strong> (tokens, passwords, customer data) into prompts or instruction files.</div></li>
+    <li class="ok"><span class="ci">✓</span><div><strong>Keep tool approvals on</strong> for writes, shell commands and network access unless the session is isolated.</div></li>
+    <li class="ok"><span class="ci">✓</span><div><strong>Treat external content as untrusted.</strong> Web pages, files and MCP responses can carry prompt-injection text.</div></li>
+    <li class="ok"><span class="ci">✓</span><div><strong>Follow your org's policy</strong> on which plans, models and MCP servers you may use.</div></li>
+  </ul>
+
+  <div class="callout danger"><div class="icon">🛑</div><p><strong>"Allow all" really means all.</strong> In the CLI, <code>--allow-all</code> or <code>/yolo</code> removes approval prompts, so a shell command can do anything your user account can: push, delete, call the network. Use it only in a disposable or sandboxed environment. Details in <a href="Copilot_Sim_Security.html">Security</a>.</p></div>
+  <p class="body">For how GitHub handles your data, see the <a href="https://copilot.github.trust.page">GitHub Copilot Trust Center</a>. Retention details depend on your plan; check the Trust Center rather than relying on second-hand numbers.</p>
+</section>
+
+<!-- 7 -->
+<section class="step-panel" data-section="The story" data-title="Meet Northwind" data-sub="Team + two case studies">
+  <div class="step-header"><div class="phase-tag purple">👥 Case study</div><h2>Northwind Logistics: one team, two codebases</h2><p>Every page in this hub follows the same people and repos, so examples build on each other.</p></div>
+
+  <div class="cards">
+    <div class="card blue"><h4>Priya</h4><p>Senior backend developer. Main protagonist. Works in VS Code.</p></div>
+    <div class="card purple"><h4>Marco</h4><p>Tech lead. Owns standards and reviews PRs. Prefers the CLI.</p></div>
+    <div class="card coral"><h4>Sam</h4><p>Security engineer. Sets approval rules, sandboxing and MCP policy.</p></div>
+    <div class="card green"><h4>Leo</h4><p>Developer and new joiner. Learning both codebases.</p></div>
+  </div>
+
+  <div data-tabs>
+    <div class="tabs">
+      <button class="tab-btn on" data-tab="ship">🌱 ShipTrack (greenfield)</button>
+      <button class="tab-btn" data-tab="ledg">🏢 Ledgerly (brownfield)</button>
+    </div>
+    <div class="tab-pane on" data-pane="ship">
+      <p class="body">A new parcel-tracking REST API in <code>northwind/shiptrack</code>: Python 3.12, FastAPI, PostgreSQL via SQLAlchemy 2 and Alembic, Pydantic v2, pytest + httpx, ruff and GitHub Actions CI.</p>
+      <div class="filetree"><div class="ft-header">Target layout</div><pre><span class="ft-folder">shiptrack/</span>
+├── <span class="ft-folder">.github/</span>
+│   ├── <span class="ft-new">copilot-instructions.md</span>   <span class="ft-note"># team conventions for Copilot</span>
+│   └── <span class="ft-folder">workflows/</span><span class="ft-file">ci.yml</span>
+├── <span class="ft-folder">app/</span>
+│   ├── <span class="ft-file">main.py</span>
+│   ├── <span class="ft-file">models.py</span>                 <span class="ft-note"># SQLAlchemy 2</span>
+│   ├── <span class="ft-file">schemas.py</span>                <span class="ft-note"># Pydantic v2</span>
+│   └── <span class="ft-folder">routers/</span><span class="ft-file">shipments.py</span>
+├── <span class="ft-folder">migrations/</span>                   <span class="ft-note"># Alembic</span>
+├── <span class="ft-folder">tests/</span>
+└── <span class="ft-file">pyproject.toml</span></pre></div>
+      <div class="tbl-wrap"><table class="tbl">
+        <tr><th>Endpoint</th><th>Purpose</th></tr>
+        <tr><td><code>POST /shipments</code></td><td>Create a shipment</td></tr>
+        <tr><td><code>GET /shipments/{id}</code></td><td>Fetch one shipment</td></tr>
+        <tr><td><code>GET /shipments/{id}/events</code></td><td>List tracking events</td></tr>
+        <tr><td><code>POST /shipments/{id}/events</code></td><td>Record a tracking event</td></tr>
+      </table></div>
+    </div>
+    <div class="tab-pane" data-pane="ledg">
+      <p class="body">A 9-year-old Django invoicing monolith in <code>northwind/ledgerly</code>: about 60k lines, apps <code>billing</code>, <code>customers</code>, <code>invoices</code>, <code>payments</code> and <code>reports</code>, Celery workers, PostgreSQL, roughly 30% test coverage, mid-upgrade from Django 3.2.</p>
+      <ol class="body">
+        <li>Understand the codebase (Leo, Ask mode).</li>
+        <li>Write <code>AGENTS.md</code> and instruction files (Marco).</li>
+        <li>Add characterization tests before touching anything.</li>
+        <li>Add a CSV export of invoices at <code>/reports/invoices.csv</code>.</li>
+        <li>Refactor the 600-line <code>invoices/views.py</code> safely.</li>
+      </ol>
+    </div>
+  </div>
+  <div class="callout tip"><div class="icon">💡</div><p>Follow ShipTrack in <a href="Copilot_Sim_Greenfield.html">Greenfield</a> and Ledgerly in <a href="Copilot_Sim_Brownfield.html">Brownfield</a>. Both assume you have finished <a href="Copilot_Sim_Setup.html">Setup</a>.</p></div>
+</section>
+
+<!-- 8 -->
+<section class="step-panel" data-section="The story" data-title="Where to go next" data-sub="Recommended path">
+  <div class="step-header"><div class="phase-tag green">🗺️ Next</div><h2>Pick your next page</h2><p>New to Copilot? Go in order. Already set up? Jump to the case study that matches your work.</p></div>
+  <div class="cards">
+    <a class="card blue" href="Copilot_Feature_Tour.html" style="text-decoration:none;color:inherit"><h4>✨ 2 · Feature Tour</h4><p>Completions, chat modes, agents, CLI, instructions, models, review and the cloud agent.</p></a>
+    <a class="card green" href="Copilot_Sim_Setup.html" style="text-decoration:none;color:inherit"><h4>⚙️ 3 · Setup</h4><p>Install and sign in to VS Code and the Copilot CLI on your OS.</p></a>
+    <a class="card purple" href="Copilot_Sim_Customize.html" style="text-decoration:none;color:inherit"><h4>🧩 4 · Customize</h4><p>Skills, agents, tools, hooks and MCP for a FastAPI repo.</p></a>
+    <a class="card coral" href="Copilot_Sim_Security.html" style="text-decoration:none;color:inherit"><h4>🛡️ 5 · Security</h4><p>Approvals, trusted folders, sandboxing and worktrees.</p></a>
+    <a class="card teal" href="Copilot_Sim_Greenfield.html" style="text-decoration:none;color:inherit"><h4>🌱 6 · Greenfield</h4><p>Build ShipTrack from brief to green CI.</p></a>
+    <a class="card amber" href="Copilot_Sim_Brownfield.html" style="text-decoration:none;color:inherit"><h4>🏢 7 · Brownfield</h4><p>Understand and extend Ledgerly safely.</p></a>
+    <a class="card" href="Copilot_FAQ.html" style="text-decoration:none;color:inherit"><h4>❓ FAQ</h4><p>Straight answers on setup, cost and daily use.</p></a>
+  </div>
+</section>
+
+    </div>
+  </main>
+</div>
+<script src="assets/copilot-sim.js?v=1"></script>
+<script src="assets/copilot-kit.js?v=1"></script>
+</body>
+</html>

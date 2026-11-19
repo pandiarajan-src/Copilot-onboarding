@@ -1,0 +1,192 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>GitHub Copilot Onboarding Kit · Copilot Onboarding Hub</title>
+<meta name="description" content="A practical GitHub Copilot onboarding kit: first-week checklist, daily workflow loop, prompt cheat sheet, review checklist for AI-generated code, team rollout checklist, do's and don'ts, and where to get help.">
+<link rel="stylesheet" href="assets/copilot-sim.css?v=1">
+<link rel="stylesheet" href="assets/copilot-kit.css?v=1">
+</head>
+<body>
+<header class="sim-header">
+  <div class="icon">🧰</div>
+  <div>
+    <h1>Onboarding Kit</h1>
+    <p>The practical pieces you keep open during your first weeks with Copilot: checklists, a daily loop, prompts that work, and the review habits that keep AI-generated code safe.</p>
+    <div class="stack-pills"><span class="pill">Updated November 2026</span><span class="pill">VS Code · Copilot CLI</span><span class="pill">For developers and leads</span><span class="pill">Northwind Logistics</span></div>
+  </div>
+  <a class="home-link" href="index.html">⌂ All guides</a>
+</header>
+<div class="wrap">
+
+  <div class="callout tip"><div class="icon">💡</div><p>Checklist ticks are saved only in this browser. Use them as a personal tracker, not as an audit record. For structured learning with labs and a quiz, see the <a href="Copilot_Training.html">Training Programme</a>.</p></div>
+
+  <h2 class="sec">First week, day by day</h2>
+  <p class="body">Leo's first week at Northwind. Each day ends with something working, not just something read.</p>
+  <ul class="track" data-key="cp-kit-week1" data-meter="cp-kit-week1-m">
+    <li><div><strong>Day 1 ·</strong> Sign in to Copilot in VS Code from the status bar (<a href="Copilot_Sim_Setup.html">Setup</a>).</div></li>
+    <li><div><strong>Day 1 ·</strong> Install the Copilot CLI, run <code>copilot version</code>, then <code>/login</code>.</div></li>
+    <li><div><strong>Day 1 ·</strong> Read the <a href="Copilot_Intro.html">Introduction</a>: what Copilot sends to a model and how AI Credits are used.</div></li>
+    <li><div><strong>Day 2 ·</strong> Clone ShipTrack. In <strong>Ask</strong>, get a tour of the repo layout and the test and lint commands.</div></li>
+    <li><div><strong>Day 2 ·</strong> Read <code>.github/copilot-instructions.md</code> and <code>AGENTS.md</code> so you know the rules the agent follows.</div></li>
+    <li><div><strong>Day 3 ·</strong> Fix one small ticket with <code>/plan</code> then <strong>Agent</strong>, approvals on Manual.</div></li>
+    <li><div><strong>Day 3 ·</strong> Run <code>pytest -q</code> and <code>ruff check .</code> yourself before you commit.</div></li>
+    <li><div><strong>Day 4 ·</strong> Do one task in the CLI inside a git worktree (<a href="Copilot_VSCode_vs_CLI.html">VS Code vs CLI</a>).</div></li>
+    <li><div><strong>Day 4 ·</strong> Read the <a href="Copilot_Sim_Security.html">Security</a> guide: approvals, trusted folders, what worktrees don't isolate.</div></li>
+    <li><div><strong>Day 5 ·</strong> Open your first PR, run <code>/review</code> on it, and go through the review checklist below.</div></li>
+    <li><div><strong>Day 5 ·</strong> Propose one improvement to the instructions file from something Copilot got wrong this week.</div></li>
+    <li><div><strong>Day 5 ·</strong> Check your week's usage with <code>/usage</code> and talk to Marco about anything surprising.</div></li>
+  </ul>
+  <div class="meter" data-track="cp-kit-week1"><span style="width:0%"></span></div>
+  <p class="track-meter" id="cp-kit-week1-m"></p>
+
+  <h2 class="sec">The daily workflow loop</h2>
+  <p class="body">Priya's loop for any change bigger than a one-liner. The same loop works in VS Code and the CLI.</p>
+  <div class="flow">
+    <span class="node done">1 · Sync</span><span class="arrow">→</span>
+    <span class="node done">2 · Plan</span><span class="arrow">→</span>
+    <span class="node on">3 · Agent works</span><span class="arrow">→</span>
+    <span class="node">4 · Verify</span><span class="arrow">→</span>
+    <span class="node">5 · Review</span><span class="arrow">→</span>
+    <span class="node">6 · Ship</span><span class="arrow">→</span>
+    <span class="node">7 · Teach</span>
+  </div>
+  <div class="tbl-wrap"><table class="tbl">
+    <tr><th>Step</th><th>What you do</th><th>VS Code</th><th>CLI</th></tr>
+    <tr><td>1 · Sync</td><td>Pull main, create a branch or worktree.</td><td>Agents window: Branch or New Worktree</td><td><code>git switch -c …</code> or <code>/new worktree</code></td></tr>
+    <tr><td>2 · Plan</td><td>State the outcome, constraints and tests. Read the plan and correct it.</td><td><code>/plan</code></td><td>Shift+Tab to plan mode, or <code>/plan</code></td></tr>
+    <tr><td>3 · Agent works</td><td>Let it edit and run commands. Approve each risky step.</td><td>Agent, permission level Manual or Assisted</td><td>Standard mode, approve once or per session</td></tr>
+    <tr><td>4 · Verify</td><td>Run tests and linters yourself. Don't trust "all tests pass" without seeing it.</td><td>Terminal: <code>pytest -q</code>, <code>ruff check .</code></td><td><code>!pytest -q</code>, <code>!ruff check .</code></td></tr>
+    <tr><td>5 · Review</td><td>Read the whole diff. Use the review checklist below.</td><td>Source Control diff view</td><td><code>!git diff</code>, <code>/review</code></td></tr>
+    <tr><td>6 · Ship</td><td>Small PR with a clear description. Human review is still required.</td><td>Commit and create PR</td><td><code>/pr create</code></td></tr>
+    <tr><td>7 · Teach</td><td>If Copilot got a convention wrong, fix the instructions, not just the code.</td><td>Edit <code>.github/copilot-instructions.md</code></td><td><code>/instructions</code> to check what loaded</td></tr>
+  </table></div>
+  <div class="callout info"><div class="icon">ℹ️</div><p>Long session getting slow or confused? Run <code>/context</code> to see what is filling it, <code>/compact</code> to shrink it, or start fresh with <code>/new</code>. In VS Code, start a new chat session.</p></div>
+
+  <h2 class="sec">Prompt cheat sheet</h2>
+  <p class="body">A good prompt names the outcome, the files, the constraints and how to check the result. Swap in your own names.</p>
+  <div class="tbl-wrap"><table class="tbl">
+    <tr><th>Goal</th><th>Where</th><th>Example prompt</th></tr>
+    <tr><td>Orient in a new repo</td><td>Ask</td><td>"Explain the folder layout, the entry points and where the API routes live. Cite the files you read."</td></tr>
+    <tr><td>Find the real commands</td><td>Ask / CLI</td><td>"Which commands run tests, lint and migrations here? Read the config files, don't guess."</td></tr>
+    <tr><td>Understand one file</td><td>CLI</td><td>"Summarise @invoices/views.py: each view, its URL, permissions and side effects. Don't change anything."</td></tr>
+    <tr><td>Plan a feature</td><td>Plan</td><td>"/plan Add POST /shipments/{id}/events. Validate status values with Pydantic, return 201 with EventOut, 404 for unknown id. Tests first."</td></tr>
+    <tr><td>Write tests first</td><td>Agent</td><td>"Write failing pytest + httpx tests for GET /shipments/{id}: found, not found, malformed id. Run them and show me they fail."</td></tr>
+    <tr><td>Implement against tests</td><td>Agent</td><td>"Make tests/test_shipments.py pass. Don't change the tests. Run pytest -q and ruff check . when done."</td></tr>
+    <tr><td>Fix a failing test</td><td>Agent</td><td>"tests/test_events.py::test_order fails. Find the cause, explain it in two sentences, then fix the code, not the test."</td></tr>
+    <tr><td>Database migration</td><td>Agent</td><td>"Add a nullable carrier_ref column to shipments. Create a new Alembic revision; don't edit existing ones. Show me the upgrade and downgrade."</td></tr>
+    <tr><td>Pin legacy behaviour</td><td>Agent</td><td>"Write characterization tests for invoice_void that assert today's behaviour exactly. Don't edit views.py. List suspected bugs separately."</td></tr>
+    <tr><td>Safe refactor</td><td>Plan</td><td>"/plan Split invoices/views.py into modules by feature. No behaviour change. The characterization tests must pass after each step."</td></tr>
+    <tr><td>Add a feature to legacy code</td><td>Plan</td><td>"/plan Add /reports/invoices.csv in the reports app. Stream rows, respect existing permissions, add tests for an empty result and a large one."</td></tr>
+    <tr><td>Explain an error</td><td>CLI</td><td>"!pytest -q fails with this trace. Explain the root cause and propose the smallest fix."</td></tr>
+    <tr><td>Review before PR</td><td>CLI</td><td>"/review" then "Which of these findings are real bugs and which are style? Fix only the bugs."</td></tr>
+    <tr><td>Security pass</td><td>CLI</td><td>"/security-review" on the branch before asking Sam for a human review.</td></tr>
+    <tr><td>Write the PR description</td><td>Ask / CLI</td><td>"Write a PR description for this branch: what changed, why, how it was tested, and risks. Keep it under 15 lines."</td></tr>
+    <tr><td>Draft repo instructions</td><td>CLI</td><td>"/init" then "Cut this to under 40 lines of checkable rules: stack, commands, testing rule, never-do list."</td></tr>
+    <tr><td>Use GitHub data</td><td>CLI (GitHub MCP)</td><td>"List open issues labelled bug in northwind/shiptrack and group them by endpoint."</td></tr>
+    <tr><td>Hand off to the cloud</td><td>CLI</td><td>"/delegate Add pagination to GET /shipments using limit and offset, with tests." (opens a PR you review)</td></tr>
+  </table></div>
+
+  <h2 class="sec">Review checklist for AI-generated code</h2>
+  <p class="body">Marco's checklist. Use it on every PR that Copilot touched, your own included.</p>
+  <ul class="track" data-key="cp-kit-review" data-meter="cp-kit-review-m">
+    <li><div>I read every changed line, not just the summary.</div></li>
+    <li><div>The change does what the ticket asked, and nothing else (no drive-by rewrites).</div></li>
+    <li><div>Tests exist for the happy path and at least two error cases, and I saw them run.</div></li>
+    <li><div>Tests check behaviour; none were weakened, skipped or deleted to make the run green.</div></li>
+    <li><div>Every import and API call exists in the versions we use (no invented functions or packages).</div></li>
+    <li><div>New dependencies are justified in the PR and come from a trusted source.</div></li>
+    <li><div>Inputs are validated at the boundary; errors are handled, not swallowed.</div></li>
+    <li><div>No secrets, tokens or real customer data in code, tests, fixtures or logs.</div></li>
+    <li><div>Queries are parameterised; no raw SQL built from strings.</div></li>
+    <li><div>Migrations are new revisions with a working downgrade; applied ones are untouched.</div></li>
+    <li><div>Linters pass (<code>ruff check .</code>) and CI is green.</div></li>
+    <li><div>I can explain this code to a teammate without Copilot.</div></li>
+  </ul>
+  <div class="meter" data-track="cp-kit-review"><span style="width:0%"></span></div>
+  <p class="track-meter" id="cp-kit-review-m"></p>
+
+  <h2 class="sec">Team rollout checklist (for leads)</h2>
+  <p class="body">Marco rolls Copilot out to the ShipTrack and Ledgerly teams. Sam owns the security items.</p>
+  <ul class="track" data-key="cp-kit-rollout" data-meter="cp-kit-rollout-m">
+    <li><div>Choose the plan (Business or Enterprise) and confirm the AI Credits allowance per seat with the admin (<a href="https://docs.github.com/en/copilot/get-started/plans">plans</a>).</div></li>
+    <li><div>Decide on Copilot Memory: it is off for Business/Enterprise until an owner enables the policy; set repo scope and fact expiry (7–180 days).</div></li>
+    <li><div>Configure content exclusion for sensitive paths, and tell the team it is not a security boundary.</div></li>
+    <li><div>Agree an approved MCP server list with Sam; ship shared servers in <code>.mcp.json</code> with no secrets.</div></li>
+    <li><div>Add <code>.github/copilot-instructions.md</code> and <code>AGENTS.md</code> to each repo, reviewed like code.</div></li>
+    <li><div>Add scoped <code>.github/instructions/*.instructions.md</code> files for tests, migrations and legacy apps.</div></li>
+    <li><div>Add <code>preToolUse</code> hooks in <code>.github/hooks/</code> to deny risky commands (for example pushes to main).</div></li>
+    <li><div>Set approval defaults: Manual or Assisted in VS Code; forbid <code>--allow-all</code> outside throwaway sandboxes.</div></li>
+    <li><div>Keep branch protection: CI green and one human approval on every PR, agent-written or not.</div></li>
+    <li><div>Run the <a href="Copilot_Training.html">Training Programme</a> with each new joiner; pair Leo with Priya for Lab 3.</div></li>
+    <li><div>Review usage monthly (each developer can check <code>/usage</code>); cap long CLI runs with <code>--max-ai-credits</code> or <code>/limits set max-ai-credits</code>.</div></li>
+    <li><div>Hold a 30-minute retro after four weeks: what to add to instructions, skills and hooks.</div></li>
+  </ul>
+  <div class="meter" data-track="cp-kit-rollout"><span style="width:0%"></span></div>
+  <p class="track-meter" id="cp-kit-rollout-m"></p>
+
+  <h2 class="sec">Do's and don'ts</h2>
+  <div class="tbl-wrap"><table class="tbl">
+    <tr><th>Do</th><th>Don't</th></tr>
+    <tr><td class="y">Plan first with <code>/plan</code> for anything bigger than a small fix.</td><td class="n">Ask for a whole feature in one vague prompt.</td></tr>
+    <tr><td class="y">Name files, constraints and how to check the result.</td><td class="n">Expect the model to guess your conventions.</td></tr>
+    <tr><td class="y">Keep approvals on; approve once when unsure.</td><td class="n">Use <code>--allow-all</code> or <code>/yolo</code> on your main machine.</td></tr>
+    <tr><td class="y">Use a branch or worktree per agent session.</td><td class="n">Run two agents in the same folder on the same files.</td></tr>
+    <tr><td class="y">Run the tests yourself and read the full diff.</td><td class="n">Merge because the agent said "all tests pass".</td></tr>
+    <tr><td class="y">Put recurring corrections into instructions or a skill.</td><td class="n">Correct the same mistake in chat every day.</td></tr>
+    <tr><td class="y">Keep PRs small and single-purpose.</td><td class="n">Mix a framework upgrade, a refactor and a feature in one PR.</td></tr>
+    <tr><td class="y">Treat web pages, MCP results and repo text as untrusted input.</td><td class="n">Let an agent follow instructions it found in a fetched page or issue.</td></tr>
+    <tr><td class="y">Keep secrets in env vars or a secrets manager.</td><td class="n">Paste tokens, passwords or customer data into a prompt.</td></tr>
+    <tr><td class="y">Start a fresh session (or <code>/compact</code>) when context gets long.</td><td class="n">Keep one session running for days across unrelated tasks.</td></tr>
+  </table></div>
+
+  <h2 class="sec">Getting help</h2>
+  <h3 class="sub">On this site</h3>
+  <div class="grid">
+    <a class="tile" href="Copilot_FAQ.html"><div class="em">❓</div><h3>FAQ</h3><p>Short answers to the questions new users ask most.</p></a>
+    <a class="tile" href="Copilot_Sim_Setup.html"><div class="em">🛠️</div><h3>Setup</h3><p>Install and sign in on Windows, macOS and Linux.</p></a>
+    <a class="tile" href="Copilot_Sim_Customize.html"><div class="em">🧩</div><h3>Customize</h3><p>Instructions, skills, agents, hooks and MCP.</p></a>
+    <a class="tile" href="Copilot_Sim_Security.html"><div class="em">🔒</div><h3>Security</h3><p>Approvals, sandboxing, trusted folders and worktrees.</p></a>
+    <a class="tile" href="Copilot_Sim_Knowledge.html"><div class="em">🧠</div><h3>Knowledge loop</h3><p>Copilot Memory and keeping team knowledge current.</p></a>
+    <a class="tile" href="Copilot_Training.html"><div class="em">🎓</div><h3>Training</h3><p>Modules, labs and the certification quiz.</p></a>
+  </div>
+  <h3 class="sub">Official documentation</h3>
+  <ul class="body">
+    <li><a href="https://code.visualstudio.com/docs/setup/copilot">Set up Copilot in VS Code</a></li>
+    <li><a href="https://code.visualstudio.com/docs/agents/overview">VS Code agents overview</a></li>
+    <li><a href="https://code.visualstudio.com/docs/agents/run/approvals">VS Code tool approvals</a></li>
+    <li><a href="https://code.visualstudio.com/docs/agent-customization/custom-instructions">VS Code custom instructions</a></li>
+    <li><a href="https://code.visualstudio.com/docs/agent-customization/mcp-servers">VS Code MCP servers</a></li>
+    <li><a href="https://docs.github.com/en/copilot/how-tos/copilot-cli/set-up-copilot-cli/install-copilot-cli">Install the Copilot CLI</a></li>
+    <li><a href="https://docs.github.com/en/copilot/reference/copilot-cli-reference/cli-command-reference">Copilot CLI command reference</a></li>
+    <li><a href="https://docs.github.com/en/copilot/how-tos/copilot-cli/use-copilot-cli/allowing-tools">Allowing tools in the Copilot CLI</a></li>
+    <li><a href="https://docs.github.com/en/copilot/reference/hooks-reference">Hooks reference</a></li>
+    <li><a href="https://docs.github.com/en/copilot/concepts/context/content-exclusion">Content exclusion</a></li>
+    <li><a href="https://docs.github.com/en/copilot/concepts/agents/copilot-memory">Copilot Memory</a></li>
+    <li><a href="https://docs.github.com/en/copilot/get-started/plans">Copilot plans and AI Credits</a></li>
+    <li><a href="https://github.com/github/copilot-cli">github/copilot-cli on GitHub</a></li>
+    <li><a href="https://copilot.github.trust.page">GitHub Copilot Trust Center</a></li>
+  </ul>
+  <div class="callout info"><div class="icon">ℹ️</div><p>Found a CLI bug or have an idea? Use <code>/feedback</code> inside a session. For team questions at Northwind, ask Marco; for anything security-related, ask Sam.</p></div>
+</div>
+<script src="assets/copilot-sim.js?v=1"></script>
+<script src="assets/copilot-kit.js?v=1"></script>
+<script>
+(function () {
+  function bars() {
+    document.querySelectorAll('.meter[data-track]').forEach(function (m) {
+      var list = document.querySelector('.track[data-key="' + m.dataset.track + '"]');
+      if (!list || !m.firstElementChild) return;
+      var all = list.querySelectorAll('li').length;
+      var done = list.querySelectorAll('li.ok').length;
+      m.firstElementChild.style.width = (all ? Math.round(done * 100 / all) : 0) + '%';
+    });
+  }
+  document.addEventListener('click', bars);
+  document.addEventListener('keyup', bars);
+  bars();
+})();
+</script>
+</body>
+</html>
